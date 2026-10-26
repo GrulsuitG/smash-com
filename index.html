@@ -1,0 +1,2224 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="롯데월드타워와 그 안의 에이피알(APR) 사무실을 3D로 부수는 스트레스 해소용 비공식 패러디 게임">
+<title>SMASH APR — 롯데월드타워 에이피알 부수기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root {
+  --panel: rgba(255, 255, 255, .86);
+  --fg: #16171b;
+  --muted: #5f636c;
+  --line: rgba(22, 23, 27, .12);
+  --accent: #ff3d7f;
+  --accent-soft: #ffe1ec;
+  --on-accent: #fff;
+  --chip-bg: #16171b;
+  --chip-fg: #fff;
+  --shadow: 0 6px 24px rgba(20, 20, 30, .16);
+}
+body.night {
+  --panel: rgba(16, 18, 28, .84);
+  --fg: #eef0f6;
+  --muted: #a2a7b6;
+  --line: rgba(255, 255, 255, .12);
+  --accent-soft: rgba(255, 61, 127, .2);
+  --chip-bg: #eef0f6;
+  --chip-fg: #16171b;
+  --shadow: 0 6px 24px rgba(0, 0, 0, .45);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  background: #cfdbe6; color: var(--fg);
+  font-family: 'Noto Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  -webkit-user-select: none; user-select: none; touch-action: none;
+}
+body.night { background: #070b18; }
+canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+#left { position: fixed; left: 16px; top: 16px; width: 240px; display: flex; flex-direction: column; gap: 10px; }
+#brand { padding: 14px 16px 12px; }
+#brand h1 { margin: 0; font-family: 'Black Han Sans', sans-serif; font-weight: 400; font-size: 34px; line-height: 1; letter-spacing: .5px; }
+#brand h1 b { color: var(--accent); font-weight: 400; }
+#brand .sub { margin: 7px 0 0; font-size: 13px; font-weight: 700; }
+#brand .note { margin: 6px 0 0; font-size: 11px; color: var(--muted); line-height: 1.5; }
+#brand .note a { color: inherit; }
+#dock { padding: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tool {
+  appearance: none; border: 1px solid var(--line); background: transparent; color: var(--fg);
+  border-radius: 10px; padding: 8px 6px 7px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: pointer; font: inherit; position: relative; transition: background .15s, transform .1s;
+}
+.tool:hover { background: var(--accent-soft); }
+.tool:active { transform: scale(.96); }
+.tool.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tool .ic { font-size: 22px; line-height: 1.15; }
+.tool .nm { font-size: 12px; font-weight: 700; }
+.tool kbd { position: absolute; top: 4px; right: 6px; font: 500 10px/1 ui-monospace, Menlo, monospace; opacity: .55; }
+#toolInfo { padding: 10px 14px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+#quakeBox { margin-top: 8px; color: var(--fg); }
+#quakeBox[hidden] { display: none; }
+#quakeBox .row { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; font-size: 13px; }
+#quakeBox .row small { font-weight: 500; color: var(--muted); font-size: 11px; }
+#quakeBox input { width: 100%; accent-color: var(--accent); margin: 6px 0 0; }
+#stats { position: fixed; right: 16px; top: 16px; padding: 14px 16px; min-width: 230px; text-align: right; }
+#stats .lbl { font-size: 11px; color: var(--muted); font-weight: 700; }
+#dmg { font-family: 'Black Han Sans', sans-serif; font-size: 30px; line-height: 1.15; font-variant-numeric: tabular-nums; color: var(--accent); }
+#dmgKor { font-size: 12px; color: var(--muted); min-height: 17px; }
+#rank { display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 999px; background: var(--chip-bg); color: var(--chip-fg); font-size: 12px; font-weight: 700; }
+#stats dl { display: grid; grid-template-columns: auto auto; gap: 3px 14px; margin: 10px 0 0; font-size: 12px; }
+#stats dt { color: var(--muted); text-align: left; }
+#stats dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+#corner { position: fixed; right: 16px; bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 300px); }
+.btn {
+  appearance: none; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 999px;
+  padding: 9px 14px; font: 700 13px 'Noto Sans KR', sans-serif; cursor: pointer; box-shadow: var(--shadow);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); white-space: nowrap;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.apr { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+#hint {
+  position: fixed; left: 50%; bottom: 74px; transform: translateX(-50%); padding: 10px 16px; font-size: 13px;
+  text-align: center; transition: opacity .6s; pointer-events: none; max-width: calc(100vw - 32px); line-height: 1.5;
+}
+#hint.gone { opacity: 0; }
+#toasts { position: fixed; left: 50%; top: 18px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; z-index: 5; }
+.toast { padding: 8px 14px; font-size: 13px; font-weight: 700; white-space: nowrap; animation: tin .25s ease-out, tout .4s ease-in 3.2s forwards; }
+@keyframes tin { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes tout { to { opacity: 0; transform: translateY(-8px); } }
+#tip { position: fixed; left: 0; top: 0; padding: 5px 9px; font-size: 12px; pointer-events: none; border-radius: 8px; white-space: nowrap; display: none; z-index: 4; }
+#pops { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.pop { position: absolute; left: 0; top: 0; will-change: transform; }
+.pop span {
+  display: block; transform: translate(-50%, -100%); font: 700 13px 'Noto Sans KR', sans-serif; color: #fff;
+  background: rgba(255, 61, 127, .92); padding: 2px 9px; border-radius: 999px; white-space: nowrap; animation: popup 1.4s ease-out forwards;
+}
+.pop.big span { font-size: 15px; background: rgba(22, 23, 27, .9); }
+@keyframes popup { 0% { opacity: 0; margin-top: 8px; } 12% { opacity: 1; margin-top: 0; } 75% { opacity: 1; } 100% { opacity: 0; margin-top: -46px; } }
+#draw { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#dim, #flash { position: fixed; inset: 0; opacity: 0; pointer-events: none; }
+#dim { background: #07040c; }
+#flash { background: #fff; }
+#comboPop {
+  position: fixed; left: 50%; top: 34%; transform: translate(-50%, -50%); font-family: 'Black Han Sans', sans-serif; font-size: 46px;
+  color: var(--accent); text-shadow: 0 2px 0 #fff, 0 8px 22px rgba(0, 0, 0, .25); pointer-events: none; opacity: 0; white-space: nowrap;
+}
+#comboPop.go { animation: combo .9s ease-out; }
+#fatal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 16px 20px; max-width: calc(100vw - 32px); font-size: 14px; font-weight: 700; line-height: 1.5; z-index: 10; }
+#fatal[hidden] { display: none; }
+#noscript { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 32px)); padding: 16px 20px; font-size: 15px; font-weight: 700; line-height: 1.6; z-index: 10; }
+@keyframes combo { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -70%) scale(1); } }
+@media (max-width: 720px) {
+  #left { left: 10px; top: 10px; width: auto; }
+  #brand { padding: 9px 12px; }
+  #brand h1 { font-size: 22px; }
+  #brand .sub { font-size: 11px; margin-top: 4px; }
+  #brand .note { display: none; }
+  #dock { position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); grid-template-columns: repeat(6, 1fr); padding: 6px; gap: 4px; }
+  .tool { padding: 6px 2px; }
+  .tool .ic { font-size: 19px; }
+  .tool .nm { font-size: 10.5px; }
+  .tool kbd { display: none; }
+  #toolInfo { position: fixed; left: 10px; right: 10px; bottom: calc(84px + env(safe-area-inset-bottom)); padding: 8px 12px; }
+  #toolInfo.noq { display: none; }
+  #toolDesc { display: none; }
+  #quakeBox { margin-top: 0; }
+  #stats { right: 10px; top: 10px; min-width: 0; padding: 9px 12px; }
+  #dmg { font-size: 19px; }
+  #dmgKor, #stats dl { display: none; }
+  #rank { font-size: 11px; margin-top: 4px; }
+  #corner { right: 10px; bottom: auto; top: 96px; flex-direction: column; align-items: flex-end; max-width: none; }
+  .btn { padding: 7px 11px; font-size: 12px; }
+  #hint { bottom: calc(150px + env(safe-area-inset-bottom)); font-size: 12px; }
+  #comboPop { font-size: 34px; }
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<svg id="draw"><polyline points="" fill="none" stroke="#ff3d7f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 9"/></svg>
+<div id="pops"></div>
+<div id="dim"></div>
+<div id="flash"></div>
+<div id="comboPop"></div>
+
+<div id="left">
+  <header id="brand" class="card">
+    <h1>SMASH <b>APR</b></h1>
+    <p class="sub">롯데월드타워 · 에이피알 본사 부수기</p>
+    <p class="note">회사·건물과 무관한 비공식 패러디, 스트레스 해소용입니다. 건물은 26층으로 줄인 축소판입니다.<br>
+      <a href="https://hong-iron.github.io/SMASH/" target="_blank" rel="noopener">SMASH 대학교</a>에서 영감을 받아 새로 만들었습니다.</p>
+  </header>
+  <nav id="dock" class="card" aria-label="부수기 도구"></nav>
+  <div id="toolInfo" class="card noq">
+    <div id="toolDesc"></div>
+    <div id="quakeBox" hidden>
+      <div class="row"><span>규모 <span id="magV">7.0</span></span><small id="magDesc"></small></div>
+      <input id="mag" type="range" min="4" max="10" step="0.1" value="7" aria-label="지진 규모">
+    </div>
+  </div>
+</div>
+
+<aside id="stats" class="card">
+  <div class="lbl">피해 청구액</div>
+  <div id="dmg">₩0</div>
+  <div id="dmgKor"></div>
+  <div id="rank">평화로운 오전 업무</div>
+  <dl>
+    <dt>부순 물건</dt><dd id="objs">0개</dd>
+    <dt>파괴율</dt><dd id="pct">0%</dd>
+    <dt>지상 추락</dt><dd id="fell">0개</dd>
+  </dl>
+</aside>
+
+<div id="corner">
+  <button class="btn apr" id="btnApr" title="A">📍 APR층</button>
+  <button class="btn" id="btnHome" title="H">🏙️ 전체</button>
+  <button class="btn" id="btnNight" title="N">🌙 야근 모드</button>
+  <button class="btn" id="btnReset" title="R">↺ 전부 복구</button>
+  <button class="btn" id="btnSound" title="M">🔊 소리</button>
+</div>
+<div id="hint" class="card"></div>
+<div id="toasts"></div>
+<div id="tip" class="card"></div>
+
+<noscript><div class="card" id="noscript">이 화면에서는 게임이 실행되지 않습니다. 파일 미리보기는 자바스크립트를 실행하지 않으니 Safari나 Chrome에서 주소로 열어 주세요.</div></noscript>
+<div id="fatal" class="card" hidden></div>
+<script>
+// 실행 중 오류가 나면 빈 화면 대신 원인을 띄운다
+function showFatal(msg) {
+  const el = document.getElementById('fatal');
+  el.hidden = false;
+  el.textContent = '게임을 시작하지 못했습니다. ' + msg;
+}
+addEventListener('error', e => showFatal(e.message || '스크립트를 불러오지 못했습니다'));
+addEventListener('unhandledrejection', e => showFatal(String(e.reason)));
+</script>
+<!-- three.js r160 + OrbitControls (MIT). 외부 CDN 없이 로컬 파일만으로 돌도록 같은 폴더에 묶어 둔다 -->
+<script src="three.bundle.js" onerror="showFatal('같은 폴더에 three.bundle.js 가 있어야 합니다.')"></script>
+<script type="module">
+const { THREE, OrbitControls } = window;
+
+const $ = s => document.querySelector(s);
+const rand = (a = 0, b = 1) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const V3 = THREE.Vector3;
+const _v = new V3(), _v2 = new V3(), _p0 = new V3(), _s = new V3(), _up = new V3(0, 1, 0);
+const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _m = new THREE.Matrix4(), _e = new THREE.Euler();
+
+// 타워: 층마다 바닥 슬래브 타일·기둥·외벽 패널이 각각 부서지는 몸체다. 위로 갈수록 좁아진다
+const FH = 3.6, NF = 26, APR_K = 8;
+const plate = k => (k <= 9 ? [38, 28] : [38 - (k - 9) * .55, 28 - (k - 9) * .4]);
+const APR_Y = APR_K * FH;
+const G = 15;
+const MAXI = 20000, SOFTCAP = 17000;
+const DENS = { wood: 650, plastic: 950, metal: 2700, glass: 2500, fabric: 250, stone: 2300, concrete: 2400, ceramic: 1800, plant: 300, elec: 1300, paper: 700, rock: 3000 };
+const CHARC = new THREE.Color(0x15110e);
+
+// ---------- 렌더러 · 카메라 ----------
+const canvas = $('#c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.3, 6000);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI * 0.49;
+controls.minDistance = 3;
+controls.maxDistance = 480;
+controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
+const portrait = () => innerWidth / innerHeight < 1;
+const VIEWS = {
+  home: () => { const f = portrait() ? 1.8 : 1; return [new V3(112 * f, 88 * f, 148 * f), new V3(0, 52, 0)]; },
+  apr: () => { const f = portrait() ? 1.7 : 1; return [new V3(34 * f, APR_Y + 14 * f, 44 * f), new V3(0, APR_Y + 1.6, 0)]; },
+};
+{ const [p, t] = VIEWS.home(); camera.position.copy(p); controls.target.copy(t); controls.update(); }
+
+// ---------- 바깥 풍경 ----------
+function canvasTex(c) {
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+}
+function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
+
+function skyTexture(night) {
+  const W = 4096, H = 1024, hz = 952;
+  const [c, g] = makeCanvas(W, H);
+  const sg = g.createLinearGradient(0, 0, 0, hz);
+  if (night) { sg.addColorStop(0, '#03050d'); sg.addColorStop(.6, '#0b1532'); sg.addColorStop(1, '#2a3354'); }
+  else { sg.addColorStop(0, '#4f8fd6'); sg.addColorStop(.55, '#9cc6ec'); sg.addColorStop(1, '#e4eef5'); }
+  g.fillStyle = sg; g.fillRect(0, 0, W, H);
+  if (night) {
+    for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(255,255,255,${rand(.2, .9)})`; const r = rand(.6, 1.8); g.fillRect(rand(0, W), rand(0, hz * .85), r, r); }
+    g.fillStyle = '#f4f1e3'; g.beginPath(); g.arc(3100, 220, 24, 0, 7); g.fill();
+  } else {
+    for (let i = 0; i < 55; i++) {
+      const x = rand(0, W), y = rand(80, hz - 160), w = rand(120, 420);
+      g.fillStyle = `rgba(255,255,255,${rand(.25, .5)})`;
+      for (let k = 0; k < 6; k++) { g.beginPath(); g.ellipse(x + rand(-w / 2, w / 2), y + rand(-12, 12), rand(w * .2, w * .45), rand(10, 26), 0, 0, 7); g.fill(); }
+    }
+  }
+  const ridge = (base, amp, col, seed) => {
+    g.fillStyle = col; g.beginPath(); g.moveTo(0, H);
+    for (let x = 0; x <= W; x += 8) {
+      const y = base - amp * (.5 + .5 * Math.sin(x * .0021 + seed)) * (.6 + .4 * Math.sin(x * .0067 + seed * 2)) - amp * .25 * Math.sin(x * .019 + seed * 3);
+      g.lineTo(x, y);
+    }
+    g.lineTo(W, H); g.closePath(); g.fill();
+  };
+  ridge(hz - 20, 70, night ? '#141c36' : '#a3b8ca', 1.3);
+  ridge(hz - 8, 40, night ? '#10172c' : '#93a8ba', 4.1);
+  for (let i = 0; i < 1800; i++) {
+    const x = rand(0, W), w = rand(4, 18), h = Math.pow(Math.random(), 3) * 46 + 3, y = hz - h + rand(0, 10);
+    g.fillStyle = night ? `hsl(225,20%,${rand(8, 18)}%)` : `hsl(${rand(200, 230)},${rand(6, 14)}%,${rand(60, 78)}%)`;
+    g.fillRect(x, y, w, H - y);
+    if (night && Math.random() < .7) {
+      g.fillStyle = `rgba(255,${rand(190, 230) | 0},120,${rand(.4, .9)})`;
+      for (let k = 0; k < w * h / 12; k++) g.fillRect(x + rand(0, w), y + rand(0, h), 1, 1);
+    }
+  }
+  const hg = g.createLinearGradient(0, hz - 30, 0, H);
+  hg.addColorStop(0, night ? 'rgba(26,33,64,0)' : 'rgba(223,232,239,0)');
+  hg.addColorStop(1, night ? '#1a2140' : '#dfe8ef');
+  g.fillStyle = hg; g.fillRect(0, hz - 30, W, H - hz + 30);
+  return canvasTex(c);
+}
+
+function groundTexture(night) {
+  const S = 1024, step = 128;
+  const [c, g] = makeCanvas(S, S);
+  g.fillStyle = night ? '#0b0f1c' : '#9aa0a6'; g.fillRect(0, 0, S, S);
+  for (let bx = 0; bx < S; bx += step) for (let by = 0; by < S; by += step) {
+    const x0 = bx + 14, y0 = by + 14, w = step - 28;
+    if (!night && Math.random() < .12) { g.fillStyle = '#86a072'; g.fillRect(x0, y0, w, w); continue; }
+    for (let k = 0; k < 6; k++) {
+      const bw = rand(14, 50), bh = rand(14, 50), x = x0 + rand(0, w - bw), y = y0 + rand(0, w - bh);
+      g.fillStyle = night ? `hsl(225,18%,${rand(8, 14)}%)` : `hsl(${rand(20, 220)},${rand(4, 12)}%,${rand(62, 82)}%)`;
+      g.fillRect(x, y, bw, bh);
+      if (night) { g.fillStyle = `rgba(255,210,140,${rand(.3, .8)})`; for (let n = 0; n < bw * bh / 40; n++) g.fillRect(x + rand(0, bw), y + rand(0, bh), 1.5, 1.5); }
+    }
+  }
+  g.fillStyle = night ? '#1b1d24' : '#7a7f86';
+  for (let i = 0; i <= S; i += step) { g.fillRect(i - 6, 0, 12, S); g.fillRect(0, i - 6, S, 12); }
+  if (night) {
+    g.fillStyle = 'rgba(255,170,80,.6)';
+    for (let i = 0; i <= S; i += step) for (let k = 0; k < S; k += 10) { g.fillRect(i - 1, k, 2, 4); g.fillRect(k, i - 1, 4, 2); }
+  }
+  const t = canvasTex(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(16, 16);
+  return t;
+}
+
+function plazaTexture() {
+  const S = 512;
+  const [c, g] = makeCanvas(S, S);
+  g.fillStyle = '#d9d5ce'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
+    g.fillStyle = `hsl(35,${rand(5, 10)}%,${rand(78, 86)}%)`;
+    g.fillRect(i * 64 + 1, j * 64 + 1, 62, 62);
+  }
+  const t = canvasTex(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(24, 24);
+  return t;
+}
+
+const TEX = { day: {}, night: {} };
+const skyMat = new THREE.MeshBasicMaterial({ side: THREE.BackSide, fog: false });
+const sky = new THREE.Mesh(new THREE.CylinderGeometry(1700, 1700, 1800, 96, 1, true), skyMat);
+sky.position.y = 900;
+scene.add(sky);
+const groundMat = new THREE.MeshStandardMaterial({ roughness: 1 });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(4200, 4200), groundMat);
+ground.rotation.x = -Math.PI / 2; ground.position.y = -.4; ground.receiveShadow = true;
+scene.add(ground);
+const plaza = new THREE.Mesh(new THREE.PlaneGeometry(190, 190), new THREE.MeshStandardMaterial({ map: plazaTexture(), roughness: .9 }));
+plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0; plaza.receiveShadow = true;
+scene.add(plaza);
+const waterMat = new THREE.MeshStandardMaterial({ color: 0x5b88ad, roughness: .25, metalness: .1 });
+const river = new THREE.Mesh(new THREE.PlaneGeometry(4200, 420), waterMat);
+river.rotation.x = -Math.PI / 2; river.position.set(0, .02, -1000);
+scene.add(river);
+const lake = new THREE.Mesh(new THREE.CircleGeometry(110, 48), waterMat);
+lake.rotation.x = -Math.PI / 2; lake.scale.set(1.7, 1, 1); lake.position.set(-260, .02, 220);
+scene.add(lake);
+
+// 주변 건물은 배경용이라 부서지지 않는다
+const cityMat = new THREE.MeshStandardMaterial({ roughness: .8 });
+const city = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), cityMat, 160);
+{
+  let n = 0;
+  const put = (x, z, w, h, d, col) => {
+    _m.compose(new V3(x, h / 2, z), _q.identity(), new V3(w, h, d));
+    city.setMatrixAt(n, _m); city.setColorAt(n, col); n++;
+  };
+  put(128, 22, 110, 26, 80, new THREE.Color(0xd8d2c8));
+  for (let i = 0; i < 600 && n < 160; i++) {
+    const a = rand(0, 6.28), r = rand(120, 760), x = Math.cos(a) * r, z = Math.sin(a) * r;
+    if (Math.hypot(x + 260, z - 220) < 230 || z < -760 || (x > 60 && x < 200 && z > -30 && z < 75)) continue;
+    put(x, z, rand(18, 45), rand(12, 80) * (r < 260 ? 1 : .7), rand(18, 45), new THREE.Color().setHSL(rand(.55, .62), rand(.05, .15), rand(.55, .75)));
+  }
+  city.count = n;
+  city.receiveShadow = true;
+  scene.add(city);
+}
+
+const hemi = new THREE.HemisphereLight(0xdfeaf5, 0x8a8478, 1.15);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.3);
+sun.position.set(-70, 150, 95);
+sun.target.position.set(0, 45, 0);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -85, right: 85, top: 95, bottom: -95, near: 10, far: 420 });
+sun.shadow.bias = -.0004; sun.shadow.normalBias = .03;
+scene.add(sun, sun.target);
+scene.fog = new THREE.Fog(0xdfe8ef, 320, 1800);
+
+// ---------- 부서지는 물체: 상자 하나하나를 인스턴스로 그린다 ----------
+const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+function makeBucket(key, mat, cast) {
+  const mesh = new THREE.InstancedMesh(boxGeo, mat, MAXI);
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  mesh.setColorAt(0, new THREE.Color());
+  mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+  mesh.count = 0;
+  mesh.castShadow = cast; mesh.receiveShadow = cast;
+  mesh.frustumCulled = false;
+  mesh.boundingSphere = new THREE.Sphere(new V3(), 1e5);
+  scene.add(mesh);
+  return { key, mesh, bodies: [], dirtyM: false, dirtyC: false };
+}
+const BK = {
+  o: makeBucket('o', new THREE.MeshStandardMaterial({ roughness: .72, metalness: .05 }), true),
+  // 외벽 유리: 밖에서 안이 잘 안 보이게 짙게. 깨져야 사무실이 드러난다
+  f: makeBucket('f', new THREE.MeshStandardMaterial({ transparent: true, opacity: .86, roughness: .15, metalness: .35 }), false),
+  g: makeBucket('g', new THREE.MeshStandardMaterial({ transparent: true, opacity: .3, roughness: .05, metalness: .2, depthWrite: false }), false),
+  e: makeBucket('e', new THREE.MeshBasicMaterial(), false),
+};
+BK.f.mesh.renderOrder = 1;
+BK.g.mesh.renderOrder = 2;
+
+let night = false;
+const LOOK = {
+  day: { hemi: [0xdfeaf5, 0x8a8478, 1.15], sun: [0xfff1dc, 2.3], fog: 0xdfe8ef, bg: 0x4f8fd6, exp: 1.0, glass: 0x000000, city: 0xffffff },
+  night: { hemi: [0xc9d2ff, 0x2a2840, .6], sun: [0x9fb4ff, .35], fog: 0x1a2140, bg: 0x03050d, exp: 1.05, glass: 0x2a2418, city: 0x39404f },
+};
+const baseHemi = new THREE.Color();
+function applyLook() {
+  const k = night ? 'night' : 'day', L = LOOK[k], T = TEX[k];
+  if (!T.sky) { T.sky = skyTexture(night); T.ground = groundTexture(night); }
+  skyMat.map = T.sky; skyMat.needsUpdate = true;
+  groundMat.map = T.ground; groundMat.needsUpdate = true;
+  waterMat.color.set(night ? 0x0b1528 : 0x5b88ad);
+  cityMat.color.set(L.city);
+  BK.f.mesh.material.emissive.set(L.glass);
+  baseHemi.set(L.hemi[0]); hemi.groundColor.set(L.hemi[1]); hemi.intensity = L.hemi[2];
+  sun.color.set(L.sun[0]); sun.intensity = L.sun[1];
+  scene.fog.color.set(L.fog); scene.background = new THREE.Color(L.bg);
+  renderer.toneMappingExposure = L.exp;
+  document.body.classList.toggle('night', night);
+  $('#btnNight').textContent = night ? '☀️ 낮 모드' : '🌙 야근 모드';
+}
+applyLook();
+
+let bodies = [], OBJS = [], floors = [];
+let deadCount = 0, rr = 0, simT = 0;
+let curFloor = -1, baseY = 0;
+const stats = { damage: 0, total: 0, out: 0, hitObjs: 0, fell: 0 };
+const pendingHits = [], later = [], crush = [], popQ = new Set();
+
+// 정적 물체를 0.5m 격자에 등록: 떨어지는 조각이 윗면에 얹히고, 단단한 물체(solid)에 부딪힌다
+const GC = .5, GX0 = -24, GZ0 = -18;
+const GNX = Math.ceil(48 / GC), GNZ = Math.ceil(36 / GC);
+const grid = Array.from({ length: GNX * GNZ }, () => []);
+const sgrid = Array.from({ length: GNX * GNZ }, () => []);
+
+function rotRows(q) {
+  const x = q.x, y = q.y, z = q.z, w = q.w;
+  return [
+    1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
+    2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
+    2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y),
+  ];
+}
+function extY(b) {
+  const q = b.quat, x = q.x, y = q.y, z = q.z, w = q.w, h = b.half;
+  return Math.abs(2 * (x * y + z * w)) * h.x + Math.abs(1 - 2 * (x * x + z * z)) * h.y + Math.abs(2 * (y * z - x * w)) * h.z;
+}
+function cellRange(x0, x1, z0, z1) {
+  return [Math.max(0, Math.floor((x0 - GX0) / GC)), Math.min(GNX - 1, Math.floor((x1 - GX0) / GC)), Math.max(0, Math.floor((z0 - GZ0) / GC)), Math.min(GNZ - 1, Math.floor((z1 - GZ0) / GC))];
+}
+function registerStatic(b) {
+  const R = rotRows(b.quat), h = b.half;
+  const ex = Math.abs(R[0]) * h.x + Math.abs(R[1]) * h.y + Math.abs(R[2]) * h.z;
+  const ey = Math.abs(R[3]) * h.x + Math.abs(R[4]) * h.y + Math.abs(R[5]) * h.z;
+  const ez = Math.abs(R[6]) * h.x + Math.abs(R[7]) * h.y + Math.abs(R[8]) * h.z;
+  const p = b.pos;
+  b.aabb = { x0: p.x - ex, x1: p.x + ex, y0: p.y - ey, y1: p.y + ey, z0: p.z - ez, z1: p.z + ez };
+  b.top = p.y + ey;
+  const [ix0, ix1, iz0, iz1] = cellRange(b.aabb.x0, b.aabb.x1, b.aabb.z0, b.aabb.z1);
+  for (let iz = iz0; iz <= iz1; iz++) for (let ix = ix0; ix <= ix1; ix++) {
+    grid[iz * GNX + ix].push(b);
+    if (b.solid) sgrid[iz * GNX + ix].push(b);
+  }
+}
+function cellAt(x, z) {
+  const ix = Math.floor((x - GX0) / GC), iz = Math.floor((z - GZ0) / GC);
+  return ix >= 0 && ix < GNX && iz >= 0 && iz < GNZ ? grid[iz * GNX + ix] : null;
+}
+let surfBody = null;
+function surfaceAt(x, z, bottom) {
+  let s = Math.abs(x) < 1500 && Math.abs(z) < 1500 ? 0 : -1e9;
+  surfBody = null;
+  const cell = cellAt(x, z);
+  if (cell) for (const o of cell) {
+    if (o.dyn || !o.alive) continue;
+    const a = o.aabb;
+    if (o.top > s && o.top <= bottom + .15 && x >= a.x0 && x <= a.x1 && z >= a.z0 && z <= a.z1) { s = o.top; surfBody = o; }
+  }
+  return s;
+}
+function ceilingAt(x, z, top) {
+  let c = Infinity;
+  const cell = cellAt(x, z);
+  if (cell) for (const o of cell) {
+    if (!o.isTile || o.dyn || !o.alive) continue;
+    const a = o.aabb;
+    if (a.y0 >= top - .05 && a.y0 < c && x >= a.x0 && x <= a.x1 && z >= a.z0 && z <= a.z1) c = a.y0;
+  }
+  return c;
+}
+
+function writeM(b) {
+  _m.compose(b.pos, b.quat, _s.copy(b.half).multiplyScalar(2));
+  b.bk.mesh.setMatrixAt(b.slot, _m); b.bk.dirtyM = true;
+}
+function writeC(b) { b.bk.mesh.setColorAt(b.slot, b.color); b.bk.dirtyC = true; }
+const totalCount = () => BK.o.mesh.count + BK.f.mesh.count + BK.g.mesh.count + BK.e.mesh.count;
+
+function tileAt(k, x, z, clampIn = false) {
+  const F = floors[k];
+  if (!F) return null;
+  let ix = Math.floor((x - F.x0) / F.tw), iz = Math.floor((z - F.z0) / F.td);
+  if (clampIn) { ix = clamp(ix, 0, F.nx - 1); iz = clamp(iz, 0, F.nz - 1); }
+  if (ix < 0 || iz < 0 || ix >= F.nx || iz >= F.nz) return null;
+  return F.tiles[iz * F.nx + ix];
+}
+function addBody(o) {
+  const bk = BK[o.b || 'o'];
+  if (bk.mesh.count >= MAXI) return null;
+  const b = {
+    pos: new V3(o.x, o.y, o.z),
+    quat: o.quat ? o.quat.clone() : new THREE.Quaternion().setFromEuler(_e.set(o.rx || 0, o.yaw || 0, o.rz || 0, 'YXZ')),
+    half: new V3(o.sx / 2, o.sy / 2, o.sz / 2), vel: new V3(), ang: new V3(),
+    dyn: !!o.dyn, sleep: false, still: 0, color: new THREE.Color(o.color), bk, slot: bk.mesh.count,
+    mat: o.mat || 'plastic', obj: o.obj || null, supports: (o.on || []).filter(Boolean), deps: [],
+    solid: !!o.solid, stab: o.stab ?? .4, alive: true, orig: !o.debris, top: 0, aabb: null,
+    glass: o.b === 'g' || o.b === 'f', isTile: !!o.tile, fac: o.fac ?? -1, queued: false,
+  };
+  b.mass = 8 * b.half.x * b.half.y * b.half.z * (DENS[b.mat] || 900);
+  // 층 바닥에 놓인 물건은 그 아래 슬래브 타일이 받친다
+  if (b.orig && !b.supports.length && !o.free && curFloor >= 0) {
+    const F = floors[curFloor];
+    if (F && Math.abs(b.pos.y - extY(b) - F.y) < .06) { const t = tileAt(curFloor, b.pos.x, b.pos.z); if (t) b.supports = [t]; }
+  }
+  for (const s of b.supports) s.deps.push(b);
+  bk.bodies[b.slot] = b; bk.mesh.count++;
+  writeM(b); writeC(b);
+  bodies.push(b);
+  if (b.orig) { stats.total++; registerStatic(b); }
+  return b;
+}
+function removeBody(b) {
+  if (!b.alive) return;
+  b.alive = false; deadCount++;
+  const bk = b.bk, last = bk.mesh.count - 1;
+  if (b.slot !== last) { const lb = bk.bodies[last]; bk.bodies[b.slot] = lb; lb.slot = b.slot; writeM(lb); writeC(lb); }
+  bk.bodies[last] = undefined; bk.mesh.count--; bk.dirtyM = bk.dirtyC = true;
+}
+
+const massFactor = b => clamp(Math.pow(20 / (b.mass + 5), .35), .12, 1.3);
+const maxHalf = b => Math.max(b.half.x, b.half.y, b.half.z);
+function boxDist(b, p) {
+  _v2.copy(p).sub(b.pos).applyQuaternion(_q2.copy(b.quat).invert());
+  const dx = Math.max(Math.abs(_v2.x) - b.half.x, 0), dy = Math.max(Math.abs(_v2.y) - b.half.y, 0), dz = Math.max(Math.abs(_v2.z) - b.half.z, 0);
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+function near(c, R) {
+  const out = [], m = R + 10;
+  for (const b of bodies) {
+    if (!b.alive) continue;
+    const p = b.pos;
+    if (Math.abs(p.x - c.x) > m || Math.abs(p.y - c.y) > m || Math.abs(p.z - c.z) > m) continue;
+    const d = boxDist(b, c);
+    if (d < R) out.push([b, d]);
+  }
+  return out;
+}
+
+function dislodged(b) {
+  if (b.orig) stats.out++;
+  const o = b.obj;
+  if (o && !o.hit) { o.hit = true; stats.damage += o.price; stats.hitObjs++; pendingHits.push({ o, p: b.pos.clone() }); }
+  if (b.fac >= 0 && !floors[b.fac].populated) popQ.add(b.fac);
+}
+function propagate(b) {
+  for (const d of b.deps) {
+    if (!d.alive || d.dyn || d.queued) continue;
+    let r = 0;
+    for (const s of d.supports) if (s.alive && !s.dyn) r++;
+    if (r >= Math.ceil(d.supports.length * .6)) continue;
+    // 구조물(슬래브·기둥·외벽)은 조금씩 늦게 무너뜨려 붕괴가 위로 번지는 게 보이게 한다
+    if (d.isTile || d.isCol || d.fac >= 0) { d.queued = true; later.push({ b: d, t: simT + rand(.08, .2) }); }
+    else release(d, rand(-.3, .3), 0, rand(-.3, .3), 1.5);
+  }
+}
+function release(b, vx = 0, vy = 0, vz = 0, spin = 0) {
+  if (!b.alive) return;
+  b.vel.x += vx; b.vel.y += vy; b.vel.z += vz;
+  if (spin) { b.ang.x += rand(-spin, spin); b.ang.y += rand(-spin, spin); b.ang.z += rand(-spin, spin); }
+  b.sleep = false; b.still = 0;
+  if (!b.dyn) { b.dyn = true; dislodged(b); propagate(b); }
+}
+function char(b, k) { b.color.lerp(CHARC, clamp(k, 0, .85)); writeC(b); }
+
+function splits(len, k) {
+  if (k === 1) return [[0, len]];
+  const w = []; let sum = 0;
+  for (let i = 0; i < k; i++) { const x = rand(.6, 1.4); w.push(x); sum += x; }
+  let acc = 0;
+  return w.map(x => { const l = len * x / sum, r = [acc, l]; acc += l; return r; });
+}
+function fracture(b, fine = false) {
+  if (!b.alive) return [];
+  const glow = b.bk === BK.e;
+  const s = [b.half.x * 2, b.half.y * 2, b.half.z * 2], maxD = Math.max(...s);
+  const minP = b.glass ? .14 : .12;
+  if (maxD < minP * 1.7 || totalCount() > SOFTCAP) return [b];
+  const div = b.glass ? 5 : b.mass > 500 ? 4.5 : fine ? 3.2 : 2.3;
+  const target = Math.max(minP, maxD / div), lim = b.glass || b.mass > 500 ? 5 : 4;
+  const cuts = s.map(d => splits(d, clamp(Math.round(d / target), 1, lim)));
+  const wasStatic = !b.dyn;
+  removeBody(b);
+  const pieces = [];
+  for (const cx of cuts[0]) for (const cy of cuts[1]) for (const cz of cuts[2]) {
+    _v.set(-s[0] / 2 + cx[0] + cx[1] / 2, -s[1] / 2 + cy[0] + cy[1] / 2, -s[2] / 2 + cz[0] + cz[1] / 2).applyQuaternion(b.quat);
+    const keepGlow = glow && Math.random() < .25;
+    const p = addBody({
+      x: b.pos.x + _v.x, y: b.pos.y + _v.y, z: b.pos.z + _v.z, sx: cx[1], sy: cy[1], sz: cz[1], quat: b.quat,
+      color: glow && !keepGlow ? 0x15171c : b.color.clone().offsetHSL(0, 0, rand(-.04, .04)),
+      b: glow ? (keepGlow ? 'e' : 'o') : b.bk.key, mat: b.mat, obj: b.obj, debris: true, dyn: true,
+    });
+    if (!p) break;
+    p.vel.copy(b.vel); p.ang.copy(b.ang);
+    pieces.push(p);
+  }
+  if (b.glass) sfx.glass();
+  if (wasStatic) { b.dyn = true; dislodged(b); propagate(b); }
+  return pieces;
+}
+function shatterGlass(g, v) {
+  for (const p of fracture(g, true)) release(p, v.x * .35 + rand(-1, 1), rand(-.5, 1.5), v.z * .35 + rand(-1, 1), 6);
+}
+
+// ---------- 물리 ----------
+function segBox(p0, p1, a, r) {
+  let tmin = 0, tmax = 1, ax = -1, sg = 0;
+  const lo = [a.x0 - r, a.y0 - r, a.z0 - r], hi = [a.x1 + r, a.y1 + r, a.z1 + r];
+  const o = [p0.x, p0.y, p0.z], d = [p1.x - p0.x, p1.y - p0.y, p1.z - p0.z];
+  for (let i = 0; i < 3; i++) {
+    if (Math.abs(d[i]) < 1e-9) { if (o[i] < lo[i] || o[i] > hi[i]) return null; continue; }
+    let t1 = (lo[i] - o[i]) / d[i], t2 = (hi[i] - o[i]) / d[i], s = -1;
+    if (t1 > t2) { const t = t1; t1 = t2; t2 = t; s = 1; }
+    if (t1 > tmin) { tmin = t1; ax = i; sg = s; }
+    if (t2 < tmax) tmax = t2;
+    if (tmin > tmax) return null;
+  }
+  return ax < 0 ? { inside: true } : { t: tmin, axis: 'xyz'[ax], sign: sg };
+}
+function pushOut(b, a, r) {
+  const p = b.pos;
+  const c = [[p.x - (a.x0 - r), 'x', -1], [(a.x1 + r) - p.x, 'x', 1], [(a.y1 + r) - p.y, 'y', 1], [p.z - (a.z0 - r), 'z', -1], [(a.z1 + r) - p.z, 'z', 1]];
+  c.sort((u, w) => u[0] - w[0]);
+  const [d, k, s] = c[0];
+  p[k] += s * (d + .002);
+  if (b.vel[k] * s < 0) b.vel[k] = -b.vel[k] * .3;
+}
+let stamp = 0;
+function hitSolids(b, p0) {
+  const r = Math.min(b.half.x, b.half.y, b.half.z) * .9 + .02, p = b.pos;
+  const [ix0, ix1, iz0, iz1] = cellRange(Math.min(p0.x, p.x) - r, Math.max(p0.x, p.x) + r, Math.min(p0.z, p.z) - r, Math.max(p0.z, p.z) + r);
+  if (ix0 > ix1 || iz0 > iz1) return;
+  stamp++;
+  for (let iz = iz0; iz <= iz1; iz++) for (let ix = ix0; ix <= ix1; ix++) for (const s of sgrid[iz * GNX + ix]) {
+    if (s.stamp === stamp || !s.alive || s.dyn) continue;
+    s.stamp = stamp;
+    const a = s.aabb;
+    if (Math.max(p0.y, p.y) < a.y0 - r || Math.min(p0.y, p.y) > a.y1 + r) continue;
+    const hit = segBox(p0, p, a, r);
+    if (!hit) continue;
+    // 유리 조각끼리는 서로 깨뜨리지 않는다. 안 그러면 한 장이 깨질 때 외벽 전체가 연쇄로 날아간다
+    if (s.glass && !b.glass && b.vel.length() * Math.sqrt(b.mass) > 9) { shatterGlass(s, b.vel); b.vel.multiplyScalar(.7); continue; }
+    if (hit.inside) { pushOut(b, a, r); continue; }
+    p.lerpVectors(p0, p, Math.max(0, hit.t - .001));
+    p[hit.axis] += hit.sign * .002;
+    if (b.vel[hit.axis] * hit.sign < 0) b.vel[hit.axis] = -b.vel[hit.axis] * .3;
+    b.vel.multiplyScalar(.85);
+  }
+}
+function settle(b, h) {
+  const R = rotRows(b.quat);
+  let bi = 0;
+  if (Math.abs(R[4]) > Math.abs(R[3 + bi])) bi = 1;
+  if (Math.abs(R[5]) > Math.abs(R[3 + bi])) bi = 2;
+  const sg = R[3 + bi] < 0 ? -1 : 1;
+  _v.set(R[bi] * sg, R[3 + bi] * sg, R[6 + bi] * sg);
+  if (_v.y > .9995) return;
+  _q.setFromUnitVectors(_v, _up);
+  _q2.identity().slerp(_q, 1 - Math.exp(-10 * h));
+  b.quat.premultiply(_q2).normalize();
+}
+let dustBudget = 0, lastThud = 0, lastFellToast = 0;
+function landedOnGround(o) {
+  o.fell = true; stats.fell++;
+  const now = performance.now();
+  if (o.price >= 100000 && now - lastFellToast > 3500) {
+    lastFellToast = now;
+    toast(`📉 ${floorLabel(o.floor)}${o.name}${josa(o.name, '이', '가')} 지상으로 떨어졌습니다`);
+  }
+}
+function step(b, h) {
+  const p = b.pos, v = b.vel;
+  v.y -= G * h;
+  v.multiplyScalar(Math.exp(-.08 * h));
+  _p0.copy(p);
+  const ey0 = extY(b), prevBottom = p.y - ey0, prevTop = p.y + ey0;
+  p.addScaledVector(v, h);
+  const w = b.ang.length();
+  if (w > 1e-4) { _q.setFromAxisAngle(_v.copy(b.ang).divideScalar(w), w * h); b.quat.premultiply(_q).normalize(); }
+  hitSolids(b, _p0);
+  const ey = extY(b), s = surfaceAt(p.x, p.z, prevBottom), under = surfBody;
+  let grounded = false;
+  if (p.y - ey <= s + .002) {
+    p.y = s + ey;
+    if (v.y < 0) {
+      const impact = -v.y;
+      v.y = impact > 1.2 ? impact * .25 : 0;
+      if (impact > 5 && dustBudget > 0) {
+        dustBudget--;
+        for (let i = 0; i < 3; i++) smoke.emit(p.x, p.y - ey + .1, p.z, rand(-1, 1), rand(.2, .8), rand(-1, 1), rand(.6, 1.2), .3 + b.half.x, 1.1 + b.half.x * 2, [.55, .52, .48], [.7, .68, .64], .35, -.3, 2);
+        const now = performance.now();
+        if (b.mass > 15 && now - lastThud > 120) { lastThud = now; sfx.thud(.4); }
+      }
+      // 무거운 슬래브가 떨어지면 아래층 슬래브도 뚫고 내려간다
+      if (impact > 13 && b.isTile && under && under.isTile && Math.random() < .25) crush.push(under);
+      if (s <= .001 && b.obj && b.obj.floor >= 1 && !b.obj.fell) landedOnGround(b.obj);
+    }
+    const fr = Math.exp(-7 * h);
+    v.x *= fr; v.z *= fr;
+    b.ang.multiplyScalar(Math.exp(-6 * h));
+    grounded = true;
+    settle(b, h);
+  } else if (v.y > 0) {
+    const c = ceilingAt(p.x, p.z, prevTop);
+    if (p.y + ey > c) { p.y = c - ey; v.y = -v.y * .2; }
+  }
+  if (Math.abs(p.x) > 1400 || Math.abs(p.z) > 1400 || p.y < -50) { removeBody(b); return; }
+  if (grounded && v.lengthSq() < .03 && b.ang.lengthSq() < .08) {
+    b.still += h;
+    if (b.still > .5) { b.sleep = true; v.set(0, 0, 0); b.ang.set(0, 0, 0); }
+  } else b.still = 0;
+  writeM(b);
+}
+function physics(dt) {
+  if (dt <= 0) return;
+  dustBudget = 25;
+  for (let i = later.length - 1; i >= 0; i--) {
+    if (later[i].t > simT) continue;
+    const d = later[i].b;
+    later.splice(i, 1);
+    d.queued = false;
+    if (d.alive && !d.dyn) release(d, rand(-.4, .4), 0, rand(-.4, .4), d.isTile ? .25 : 1.2);
+  }
+  const sub = dt > .02 ? 2 : 1, h = dt / sub;
+  for (let k = 0; k < sub; k++) for (let i = 0; i < bodies.length; i++) {
+    const b = bodies[i];
+    if (b.alive && b.dyn && !b.sleep) step(b, h);
+  }
+  for (const t of crush) {
+    if (!t.alive || t.dyn) continue;
+    for (const p of fracture(t, false)) release(p, rand(-1, 1), -1, rand(-1, 1), 2);
+    sfx.thud(.8);
+  }
+  crush.length = 0;
+  // 받치던 물체가 사라진 뒤에도 잠든 조각이 공중에 떠 있지 않게 조금씩 다시 확인한다
+  const L = bodies.length;
+  for (let k = 0; k < 300 && L > 0; k++) {
+    rr = (rr + 1) % L;
+    const b = bodies[rr];
+    if (b.alive && b.dyn && b.sleep) {
+      const bottom = b.pos.y - extY(b);
+      if (bottom > surfaceAt(b.pos.x, b.pos.z, bottom) + .03) { b.sleep = false; b.still = 0; }
+    }
+  }
+  if (deadCount > 400) { bodies = bodies.filter(b => b.alive); deadCount = 0; rr = 0; }
+}
+
+// ---------- 효과 ----------
+const PVS = `attribute vec3 pcolor; attribute float alpha; attribute float size; uniform float uScale;
+varying vec3 vC; varying float vA;
+void main() { vC = pcolor; vA = alpha; vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  gl_PointSize = size * uScale / max(0.1, -mv.z); gl_Position = projectionMatrix * mv; }`;
+const PFS = `varying vec3 vC; varying float vA;
+void main() { float r = length(gl_PointCoord - 0.5) * 2.0; if (r > 1.0) discard; gl_FragColor = vec4(vC, vA * (1.0 - r * r)); }`;
+const pScale = { value: 1 };
+class PSys {
+  constructor(n, blending) {
+    this.n = n; this.i = 0;
+    const F = k => new Float32Array(n * k);
+    Object.assign(this, { p: F(3), v: F(3), c: F(3), c0: F(3), c1: F(3), a: F(1), a0: F(1), sz: F(1), s0: F(1), s1: F(1), life: F(1), max: F(1), g: F(1), dr: F(1) });
+    const geo = new THREE.BufferGeometry();
+    const attr = (arr, k) => new THREE.BufferAttribute(arr, k).setUsage(THREE.DynamicDrawUsage);
+    geo.setAttribute('position', attr(this.p, 3)); geo.setAttribute('pcolor', attr(this.c, 3));
+    geo.setAttribute('alpha', attr(this.a, 1)); geo.setAttribute('size', attr(this.sz, 1));
+    this.geo = geo;
+    const pts = new THREE.Points(geo, new THREE.ShaderMaterial({ uniforms: { uScale: pScale }, vertexShader: PVS, fragmentShader: PFS, transparent: true, depthWrite: false, blending }));
+    pts.frustumCulled = false; pts.renderOrder = 3;
+    scene.add(pts);
+  }
+  emit(x, y, z, vx, vy, vz, life, s0, s1, c0, c1, a0, g, dr) {
+    const i = this.i; this.i = (i + 1) % this.n;
+    const i3 = i * 3;
+    this.p[i3] = x; this.p[i3 + 1] = y; this.p[i3 + 2] = z;
+    this.v[i3] = vx; this.v[i3 + 1] = vy; this.v[i3 + 2] = vz;
+    for (let k = 0; k < 3; k++) { this.c0[i3 + k] = c0[k]; this.c1[i3 + k] = c1[k]; }
+    this.life[i] = this.max[i] = life; this.s0[i] = s0; this.s1[i] = s1; this.a0[i] = a0; this.g[i] = g; this.dr[i] = dr;
+  }
+  update(dt) {
+    for (let i = 0; i < this.n; i++) {
+      if (this.life[i] <= 0) { if (this.sz[i] !== 0) { this.sz[i] = 0; this.a[i] = 0; } continue; }
+      this.life[i] -= dt;
+      const k = clamp(1 - this.life[i] / this.max[i], 0, 1), i3 = i * 3, d = Math.exp(-this.dr[i] * dt);
+      this.v[i3] *= d; this.v[i3 + 1] = this.v[i3 + 1] * d - this.g[i] * dt; this.v[i3 + 2] *= d;
+      for (let j = 0; j < 3; j++) { this.p[i3 + j] += this.v[i3 + j] * dt; this.c[i3 + j] = this.c0[i3 + j] + (this.c1[i3 + j] - this.c0[i3 + j]) * k; }
+      this.sz[i] = this.life[i] <= 0 ? 0 : this.s0[i] + (this.s1[i] - this.s0[i]) * k;
+      this.a[i] = this.a0[i] * (1 - k);
+    }
+    for (const name of ['position', 'pcolor', 'alpha', 'size']) this.geo.attributes[name].needsUpdate = true;
+  }
+  clear() { this.life.fill(0); this.sz.fill(0); this.a.fill(0); }
+}
+const fire = new PSys(3500, THREE.AdditiveBlending);
+const smoke = new PSys(5000, THREE.NormalBlending);
+const FIRE0 = [2.4, 1.6, .7], FIRE1 = [1, .25, .05], SMOKE0 = [.32, .29, .27], SMOKE1 = [.58, .56, .53];
+
+const fbGeo = new THREE.SphereGeometry(1, 24, 16);
+const fireballs = Array.from({ length: 8 }, () => {
+  const m = new THREE.Mesh(fbGeo, new THREE.MeshBasicMaterial({ color: 0xffaa55, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+  m.visible = false; scene.add(m);
+  return { m, t: 1, d: 1, r: 1 };
+});
+function fireball(p, r, d = .6) {
+  const f = fireballs.find(f => f.t >= f.d) || fireballs[0];
+  f.t = 0; f.d = d; f.r = r; f.m.position.copy(p); f.m.visible = true;
+}
+const ringGeo = new THREE.RingGeometry(.86, 1, 64);
+const rings = Array.from({ length: 4 }, () => {
+  const m = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+  m.rotation.x = -Math.PI / 2; m.visible = false; scene.add(m);
+  return { m, t: 1, d: 1, r: 1 };
+});
+function shock(p, r, d = .5) {
+  const f = rings.find(f => f.t >= f.d) || rings[0];
+  f.t = 0; f.d = d; f.r = r; f.m.position.set(p.x, Math.max(p.y, 0) + .06, p.z); f.m.visible = true;
+}
+const flashLights = Array.from({ length: 3 }, () => {
+  const l = new THREE.PointLight(0xffb070, 0, 0, 1.6); scene.add(l);
+  return { l, t: 1, d: 1, i: 0 };
+});
+function flashLight(p, power, dur) {
+  const f = flashLights.reduce((a, b) => (a.t / a.d > b.t / b.d ? a : b));
+  f.l.position.set(p.x, p.y + .8, p.z); f.t = 0; f.d = dur; f.i = power;
+}
+
+function decalTexture(kind) {
+  const [c, g] = makeCanvas(256, 256);
+  if (kind === 'crack') {
+    const rg = g.createRadialGradient(128, 128, 0, 128, 128, 70);
+    rg.addColorStop(0, 'rgba(30,26,22,.55)'); rg.addColorStop(1, 'rgba(30,26,22,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+    g.strokeStyle = 'rgba(20,18,16,.85)';
+    for (let i = 0; i < 14; i++) {
+      let a = rand(0, 6.28), x = 128, y = 128;
+      g.lineWidth = rand(1.5, 4); g.beginPath(); g.moveTo(x, y);
+      for (let s = 0; s < 8; s++) { a += rand(-.5, .5); x += Math.cos(a) * rand(8, 16); y += Math.sin(a) * rand(8, 16); g.lineTo(x, y); }
+      g.stroke();
+    }
+  } else if (kind === 'glow') {
+    const rg = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(.5, 'rgba(255,255,255,.7)'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+  } else {
+    const rg = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+    rg.addColorStop(0, 'rgba(12,10,8,.95)'); rg.addColorStop(.55, 'rgba(25,20,16,.75)'); rg.addColorStop(1, 'rgba(30,24,20,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 60; i++) {
+      const a = rand(0, 6.28), r = rand(0, 105);
+      g.fillStyle = `rgba(0,0,0,${rand(.1, .3)})`; g.beginPath(); g.arc(128 + Math.cos(a) * r, 128 + Math.sin(a) * r, rand(4, 16), 0, 7); g.fill();
+    }
+  }
+  return canvasTex(c);
+}
+const DTEX = { scorch: decalTexture('scorch'), crack: decalTexture('crack'), glow: decalTexture('glow') };
+const planeGeo = new THREE.PlaneGeometry(1, 1);
+const decals = [];
+let decalI = 0, decalY = 0;
+// 그을음 자국은 맞은 지점 바로 아래 바닥(층 슬래브 또는 지면)에 붙인다
+function addDecal(x, y, z, r, kind) {
+  const floorY = surfaceAt(x, z, y + .2);
+  if (floorY < -1 || y - floorY > 1.4) return;
+  let d = decals[decalI];
+  if (!d) {
+    const m = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
+    m.rotation.x = -Math.PI / 2; m.renderOrder = 1; scene.add(m);
+    d = decals[decalI] = { m, t: 0, kind };
+  }
+  decalI = (decalI + 1) % 90;
+  decalY = (decalY + 1) % 50;
+  const m = d.m;
+  m.visible = true; m.material.map = DTEX[kind]; m.material.needsUpdate = true;
+  m.position.set(x, floorY + .006 + decalY * .0004, z); m.scale.set(r * 2, r * 2, 1); m.rotation.z = rand(0, 6.28);
+  d.kind = kind; d.t = 0; d.under = surfBody;
+  if (kind === 'glow') m.material.color.setRGB(3, 1.2, .35); else m.material.color.set(0xffffff);
+}
+
+let shakeAmp = 0;
+const shakeOff = new V3();
+const addShake = a => { shakeAmp = Math.max(shakeAmp, a); };
+let timeScale = 1, slow = null, flashA = 0, dimA = 0, dimTarget = 0, tint = 0;
+function slowmo(scale, hold, ramp) { slow = { scale, hold, ramp, t: 0 }; }
+function flash(a) { flashA = Math.max(flashA, a); }
+
+function blastFx(c, R) {
+  fireball(c, R * .9, .55);
+  shock(c, R * 2.2, .5);
+  flashLight(c, 120 * R * R, .5);
+  for (let i = 0; i < R * 28; i++) {
+    _v.set(rand(-1, 1), rand(-.2, 1), rand(-1, 1)).normalize().multiplyScalar(rand(2, 7) * R);
+    fire.emit(c.x, c.y + .2, c.z, _v.x, _v.y, _v.z, rand(.3, .7), R * .55, R * .12, FIRE0, FIRE1, 1, -2, 3);
+  }
+  for (let i = 0; i < R * 16; i++) {
+    _v.set(rand(-1, 1), rand(0, 1), rand(-1, 1)).normalize().multiplyScalar(rand(.5, 2) * R);
+    smoke.emit(c.x + rand(-.5, .5), c.y + .3, c.z + rand(-.5, .5), _v.x, _v.y + 1, _v.z, rand(1.5, 3), R * .4, R * 1.5, SMOKE0, SMOKE1, .65, -.6, 1.6);
+  }
+  for (let i = 0; i < R * 14; i++) {
+    _v.set(rand(-1, 1), rand(.2, 1.2), rand(-1, 1)).normalize().multiplyScalar(rand(6, 14));
+    fire.emit(c.x, c.y + .2, c.z, _v.x, _v.y, _v.z, rand(.5, 1.1), .14, .05, [2.5, 2.1, 1.2], [2, .6, .2], 1, 9, .5);
+  }
+}
+
+// ---------- 소리 (Web Audio로 합성) ----------
+let muted = false;
+const sfx = {
+  ctx: null, master: null, nb: null, last: {},
+  init() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    this.ctx = new AC();
+    this.master = this.ctx.createGain(); this.master.gain.value = muted ? 0 : .55;
+    const comp = this.ctx.createDynamicsCompressor();
+    this.master.connect(comp); comp.connect(this.ctx.destination);
+    const len = this.ctx.sampleRate * 2;
+    this.nb = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const d = this.nb.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  },
+  ok(name, gap) {
+    if (!this.ctx) return false;
+    const n = performance.now();
+    if (gap && this.last[name] && n - this.last[name] < gap) return false;
+    this.last[name] = n; return true;
+  },
+  noise(dur, type, f0, f1, gain, q = .7, delay = 0) {
+    const c = this.ctx, t = c.currentTime + delay;
+    const s = c.createBufferSource(); s.buffer = this.nb;
+    const fl = c.createBiquadFilter(); fl.type = type; fl.Q.value = q;
+    fl.frequency.setValueAtTime(f0, t); fl.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(this.master);
+    s.start(t, Math.random() * 1.5); s.stop(t + dur + .05);
+  },
+  tone(f0, f1, dur, type, gain, delay = 0) {
+    const c = this.ctx, t = c.currentTime + delay;
+    const o = c.createOscillator(); o.type = type;
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + dur + .05);
+  },
+  boom(s = 1) { if (!this.ok('boom', 40)) return; this.noise(.5 + s * .9, 'lowpass', 900 + s * 400, 60, Math.min(1.3, .5 + s * .4)); this.tone(120, 30, .4 + s * .5, 'sine', .8); },
+  glass() {
+    if (!this.ok('glass', 90)) return;
+    for (let i = 0; i < 5; i++) { const d = i * rand(.01, .05); this.noise(rand(.08, .25), 'highpass', rand(2500, 5000), rand(3000, 6000), .22, 1, d); this.tone(rand(2000, 4500), rand(1500, 4000), .12, 'triangle', .05, d); }
+  },
+  thud(g = 1) { if (!this.ok('thud', 50)) return; this.noise(.35, 'lowpass', 500, 80, .9 * g); this.tone(95, 40, .3, 'sine', .9 * g); },
+  swoosh() { if (!this.ok('sw', 0)) return; this.noise(.28, 'bandpass', 300, 2400, .4, 1.2); },
+  charge() { if (!this.ok('ch', 0)) return; this.tone(180, 1600, .55, 'sawtooth', .07); },
+  zap(dur) { if (!this.ok('zap', 0)) return; this.tone(1300, 700, dur, 'sawtooth', .06); this.noise(dur, 'bandpass', 3200, 2200, .12, 3); },
+  whistle(dur) { if (!this.ok('wh', 0)) return; this.tone(1600, 320, dur, 'sine', .16); },
+  rumble(dur, gain) { if (!this.ok('ru', 0)) return; this.noise(dur, 'lowpass', 170, 60, gain, .5); },
+  nuke() { if (!this.ok('nk', 0)) return; this.noise(6, 'lowpass', 1300, 40, 1.3, .4); this.tone(60, 20, 5, 'sine', 1); this.noise(1.2, 'highpass', 3000, 800, .35); },
+};
+
+// ---------- 공통 가구 ----------
+const C = {
+  desk: 0xece5d8, leg: 0xc9ccd1, felt: 0xc4bcc1, black: 0x1d1f24, dark: 0x2a2c31, white: 0xf4f3f0,
+  pink: 0xff4f8b, pinkSoft: 0xf7b7cb, concrete: 0xcbc6be, glass: 0xd2ebf4, wood: 0xd9c4a3,
+  facade: 0x8fa9bb, spandrel: 0x55616d, slab: 0x8d9096,
+};
+const SCREEN = [0x5aa9ff, 0x86e3bf, 0xffc7da, 0xe8eef7, 0x9b8cff, 0xffe08a];
+const PAL = [
+  [0xff6f9f, 0xffc2d4, 0xf04d84],
+  [0xf7f5f1, 0xe8e2da, 0xffffff],
+  [0x9fd8c4, 0xc9eee0, 0x6cbfa3],
+  [0x2a2a2e, 0x47474d, 0x111114],
+];
+
+function obj(name, price) { const o = { name, price, floor: curFloor, hit: false, fell: false }; OBJS.push(o); return o; }
+function frame(ox, oz, yaw = 0) { return { ox, oz, yaw, c: Math.cos(yaw), s: Math.sin(yaw) }; }
+function toW(f, lx, lz) { return [f.ox + lx * f.c + lz * f.s, f.oz - lx * f.s + lz * f.c]; }
+// ly 는 지금 짓는 층 바닥에서 잰 높이. 회전은 frame 의 yaw 를 따른다
+function PF(O, f, lx, ly, lz, sx, sy, sz, color, ex = {}) {
+  const [x, z] = toW(f, lx, lz);
+  return addBody({ ...ex, x, y: baseY + ly + sy / 2, z, sx, sy, sz, color, obj: O, yaw: f.yaw + (ex.ry || 0) });
+}
+const addB = (O, x, ly, z, sx, sy, sz, color, ex = {}) => PF(O, frame(x, z, ex.yaw || 0), 0, ly, 0, sx, sy, sz, color, ex);
+const ceilTile = (x, z) => tileAt(curFloor + 1, x, z, true);
+
+function monitor(f, lx, ly, lz, yo, top, wide) {
+  const w = wide ? .82 : .56, h = wide ? .4 : .34;
+  const [wx, wz] = toW(f, lx, lz), m = frame(wx, wz, f.yaw + yo);
+  const O = obj(wide ? '34인치 와이드 모니터' : '27인치 모니터', wide ? 690000 : 350000);
+  const base = PF(O, m, 0, ly, 0, .24, .02, .18, C.dark, { mat: 'metal', stab: .22, on: [top] });
+  const neck = PF(O, m, 0, ly + .02, -.04, .05, .3, .04, C.dark, { mat: 'metal', stab: .22, on: [base] });
+  const bz = PF(O, m, 0, ly + .12, 0, w + .02, h + .02, .035, 0x1b1c20, { mat: 'elec', stab: .22, on: [neck] });
+  PF(O, m, 0, ly + .13, .019, w, h, .006, pick(SCREEN), { b: 'e', mat: 'elec', stab: .22, on: [bz] });
+}
+function product(f, lx, ly, lz, on, pal = pick(PAL)) {
+  const t = Math.random();
+  if (t < .34) {
+    const h = rand(.13, .2), O = obj('앰플', 38000);
+    const b = PF(O, f, lx, ly, lz, .065, h, .065, pick(pal), { mat: 'glass', stab: .12, on: [on] });
+    PF(O, f, lx, ly + h, lz, .035, .04, .035, pick([0xd4b26a, 0x222226, 0xffffff]), { stab: .12, on: [b] });
+    return .065;
+  }
+  if (t < .52) {
+    const O = obj('크림', 52000);
+    const b = PF(O, f, lx, ly, lz, .1, .07, .1, pick(pal), { mat: 'ceramic', stab: .12, on: [on] });
+    PF(O, f, lx, ly + .07, lz, .104, .025, .104, pick([0xd4b26a, 0x222226, 0xffffff]), { stab: .12, on: [b] });
+    return .1;
+  }
+  if (t < .68) {
+    PF(obj('선크림', 28000), f, lx, ly, lz, .05, .17, .035, pick(pal), { stab: .12, on: [on] });
+    return .05;
+  }
+  if (t < .86) {
+    PF(obj('마스크팩 박스', 33000), f, lx, ly, lz, .13, .18, .06, pick(pal), { mat: 'paper', stab: .12, on: [on] });
+    return .13;
+  }
+  const O = obj('뷰티 디바이스', 490000);
+  const b = PF(O, f, lx, ly, lz, .06, .18, .045, C.white, { mat: 'elec', stab: .12, on: [on] });
+  PF(O, f, lx, ly + .18, lz, .09, .06, .055, pick([C.pink, 0xe9e2f0, 0x2b2b30]), { mat: 'elec', stab: .12, on: [b] });
+  return .09;
+}
+function desk(cx, cz, yaw) {
+  const f = frame(cx, cz, yaw), D = obj('사무용 책상', 420000);
+  const legL = PF(D, f, -.67, 0, 0, .04, .7, .64, C.leg, { mat: 'metal', stab: .55 });
+  const legR = PF(D, f, .67, 0, 0, .04, .7, .64, C.leg, { mat: 'metal', stab: .55 });
+  const top = PF(D, f, 0, .7, 0, 1.42, .03, .72, C.desk, { mat: 'wood', stab: .55, on: [legL, legR] });
+  PF(D, f, 0, .28, -.3, 1.3, .38, .02, C.leg, { mat: 'metal', stab: .55, on: [legL, legR] });
+  const ty = .73;
+  PF(obj('책상 칸막이', 180000), f, 0, ty, -.345, 1.4, .38, .03, C.felt, { mat: 'fabric', stab: .3, on: [top] });
+  if (Math.random() < .45) { monitor(f, -.3, ty, -.17, .12, top); monitor(f, .3, ty, -.17, -.12, top); }
+  else monitor(f, 0, ty, -.17, 0, top, Math.random() < .5);
+  const K = obj('키보드·마우스', 248000);
+  PF(K, f, 0, ty, .12, .44, .02, .14, pick([0x2b2d33, 0xeeeeee]), { stab: .12, on: [top] });
+  PF(K, f, .34, ty, .13, .06, .03, .1, 0x2b2d33, { stab: .12, on: [top] });
+  const side = Math.random() < .5 ? 1 : -1;
+  if (Math.random() < .6) PF(obj('머그컵', 15000), f, side * rand(.48, .62), ty, rand(-.05, .2), .08, .1, .08, pick([0xffffff, 0xff7aa2, 0x222428, 0xf2d17a]), { mat: 'ceramic', stab: .1, on: [top] });
+  if (Math.random() < .5) product(f, -side * rand(.5, .6), ty, rand(-.08, .1), top);
+  return f;
+}
+function chair(cx, cz, yaw, col) {
+  const f = frame(cx, cz, yaw), O = obj('사무용 의자', 1290000);
+  const b1 = PF(O, f, 0, 0, 0, .62, .05, .07, C.dark, { mat: 'metal', stab: .3 });
+  const b2 = PF(O, f, 0, 0, 0, .07, .05, .62, C.dark, { mat: 'metal', stab: .3 });
+  const post = PF(O, f, 0, .05, 0, .06, .36, .06, 0x8b8f96, { mat: 'metal', stab: .3, on: [b1, b2] });
+  const seat = PF(O, f, 0, .41, 0, .5, .08, .48, col, { mat: 'fabric', stab: .3, on: [post] });
+  PF(O, f, 0, .49, .22, .46, .56, .06, col, { mat: 'fabric', stab: .3, on: [seat] });
+  PF(O, f, -.26, .49, -.02, .05, .18, .3, C.dark, { stab: .3, on: [seat] });
+  PF(O, f, .26, .49, -.02, .05, .18, .3, C.dark, { stab: .3, on: [seat] });
+}
+function pendant(cx, cz, len, yaw = 0) {
+  const O = obj('펜던트 조명', 380000), f = frame(cx, cz, yaw);
+  const [ax, az] = toW(f, -len * .35, 0), [bx, bz] = toW(f, len * .35, 0);
+  const c1 = PF(O, f, -len * .35, 2.82, 0, .015, .33, .015, 0x777b82, { mat: 'metal', stab: .35, on: [ceilTile(ax, az)] });
+  const c2 = PF(O, f, len * .35, 2.82, 0, .015, .33, .015, 0x777b82, { mat: 'metal', stab: .35, on: [ceilTile(bx, bz)] });
+  const hsg = PF(O, f, 0, 2.76, 0, len, .06, .16, 0x2b2d33, { mat: 'metal', stab: .35, on: [c1, c2] });
+  PF(O, f, 0, 2.745, 0, len - .08, .016, .11, 0xfff4e0, { b: 'e', stab: .35, on: [hsg] });
+}
+function plant(x, z, s = 1) {
+  const O = obj('대형 화분', 180000);
+  let below = addB(O, x, 0, z, .45 * s, .5 * s, .45 * s, 0xeeeae4, { mat: 'ceramic', stab: .3 });
+  let y = .5 * s;
+  for (let i = 0; i < 3; i++) {
+    const w = (.7 - i * .15) * s, h = (.45 - i * .05) * s;
+    below = addB(O, x + rand(-.06, .06), y, z + rand(-.06, .06), w, h, w, pick([0x3f7d3a, 0x5b9a48, 0x4a8a3f]), { mat: 'plant', stab: .3, yaw: rand(0, 1.5), on: [below] });
+    y += h * .85;
+  }
+}
+const bin = (x, z) => addB(obj('휴지통', 25000), x, 0, z, .3, .38, .3, 0x3b3e45, { stab: .2 });
+function glassRun(a, b, c, along) {
+  const n = Math.max(1, Math.round((b - a) / 1.2)), w = (b - a) / n;
+  const P = obj('유리벽 프레임', 200000);
+  for (let i = 0; i < n; i++) {
+    const m = a + w * (i + .5);
+    const [x, z] = along === 'x' ? [m, c] : [c, m];
+    addB(obj('회의실 유리벽', 850000), x, 0, z, along === 'x' ? w - .03 : .025, 2.7, along === 'x' ? .025 : w - .03, C.glass, { b: 'g', mat: 'glass', stab: .6, solid: true });
+  }
+  for (let i = 0; i <= n; i++) {
+    const m = a + w * i;
+    const [x, z] = along === 'x' ? [m, c] : [c, m];
+    addB(P, x, 0, z, .045, 2.75, .045, 0x3d4148, { mat: 'metal', stab: .7 });
+  }
+}
+function tv(x, z, yaw, on) {
+  const f = frame(x, z, yaw), O = obj('회의실 TV', 3200000);
+  const bz = PF(O, f, 0, .95, 0, 2, 1.15, .05, 0x111214, { mat: 'elec', stab: .5, on: [on] });
+  PF(O, f, 0, .98, .027, 1.92, 1.08, .006, pick([0x7aa8ff, 0xff8fb1, 0xffffff]), { b: 'e', stab: .5, on: [bz] });
+}
+function tvStand(x, z, yaw) {
+  const f = frame(x, z, yaw), O = obj('이동형 TV', 3600000);
+  const base = PF(O, f, 0, 0, 0, .8, .05, .55, C.dark, { mat: 'metal', stab: .45 });
+  const pole = PF(O, f, 0, .05, -.05, .08, 1.4, .08, 0x8b8f96, { mat: 'metal', stab: .45, on: [base] });
+  const bz = PF(O, f, 0, .85, 0, 1.8, 1.04, .05, 0x111214, { mat: 'elec', stab: .45, on: [pole] });
+  PF(O, f, 0, .88, .027, 1.72, .97, .006, 0xff8fb1, { b: 'e', stab: .45, on: [bz] });
+}
+function meetTable(cx, cz) {
+  const f = frame(cx, cz, 0), O = obj('회의 테이블', 2400000);
+  const p1 = PF(O, f, 0, 0, -1.05, .5, .72, .12, 0xd9d6d0, { mat: 'wood', stab: .55 });
+  const p2 = PF(O, f, 0, 0, 1.05, .5, .72, .12, 0xd9d6d0, { mat: 'wood', stab: .55 });
+  const top = PF(O, f, 0, .72, 0, 1.25, .045, 3.4, 0xefe9df, { mat: 'wood', stab: .55, on: [p1, p2] });
+  const ty = .765;
+  for (const [lx, lz, yaw] of [[-.35, -.7, -Math.PI / 2], [.35, .5, Math.PI / 2]]) {
+    const lf = frame(...toW(f, lx, lz), yaw), L = obj('노트북', 2100000);
+    const b = PF(L, lf, 0, ty, 0, .32, .015, .22, 0xb9bcc2, { mat: 'elec', stab: .15, on: [top] });
+    PF(L, lf, 0, ty + .01, -.12, .32, .21, .01, 0xb9bcc2, { mat: 'elec', stab: .15, rx: -.3, on: [b] });
+  }
+  for (const [lx, lz] of [[.3, -1.2], [-.4, .9], [.1, 1.4]]) PF(obj('종이컵', 300), f, lx, ty, lz, .07, .09, .07, 0xffffff, { mat: 'paper', stab: .1, on: [top] });
+  PF(obj('회의 자료 더미', 5000), f, -.2, ty, .1, .21, .05, .3, 0xffffff, { mat: 'paper', stab: .1, on: [top] });
+  const col = () => pick([0xf3f1ee, 0x2f3237, C.pink]);
+  for (const z of [-1.2, 0, 1.2]) { chair(cx - .95, cz + z, -Math.PI / 2 + rand(-.2, .2), col()); chair(cx + .95, cz + z, Math.PI / 2 + rand(-.2, .2), col()); }
+  chair(cx, cz - 2.1, Math.PI, col()); chair(cx, cz + 2.1, 0, col());
+}
+function sofa(cx, cz, yaw, w, col) {
+  const f = frame(cx, cz, yaw), O = obj('라운지 소파', 2600000);
+  const base = PF(O, f, 0, 0, 0, w, .42, .85, col, { mat: 'fabric', stab: .5 });
+  PF(O, f, 0, .42, .33, w, .45, .2, col, { mat: 'fabric', stab: .5, on: [base] });
+  PF(O, f, -w / 2 + .09, 0, 0, .18, .62, .85, col, { mat: 'fabric', stab: .5 });
+  PF(O, f, w / 2 - .09, 0, 0, .18, .62, .85, col, { mat: 'fabric', stab: .5 });
+  for (const s of [-1, 1]) PF(obj('쿠션', 59000), f, s * w * .25, .42, .17, .42, .38, .12, pick([C.pink, C.pinkSoft, 0xf4efe6]), { mat: 'fabric', stab: .2, on: [base] });
+}
+function coffeeTable(cx, cz, yaw) {
+  const f = frame(cx, cz, yaw), O = obj('커피 테이블', 520000);
+  const l1 = PF(O, f, -.5, 0, 0, .04, .38, .55, C.dark, { mat: 'metal', stab: .5 });
+  const l2 = PF(O, f, .5, 0, 0, .04, .38, .55, C.dark, { mat: 'metal', stab: .5 });
+  const top = PF(O, f, 0, .38, 0, 1.1, .04, .6, C.wood, { mat: 'wood', stab: .5, on: [l1, l2] });
+  let below = top, y = .42;
+  for (let i = 0; i < 3; i++) { below = PF(obj('잡지', 12000), f, -.2 + rand(-.03, .03), y, rand(-.03, .03), .22, .03, .3, pick([C.pink, 0x2d6cdf, 0xffffff, 0xf2c14e]), { mat: 'paper', stab: .1, ry: rand(-.3, .3), on: [below] }); y += .03; }
+  PF(obj('머그컵', 15000), f, .3, .42, .05, .08, .1, .08, 0xffffff, { mat: 'ceramic', stab: .1, on: [top] });
+}
+function beanbag(x, z) {
+  const O = obj('빈백', 290000), col = pick([0xf2c4d3, 0xd9cbb5, 0x8fa9bf, C.pink]);
+  const b = addB(O, x, 0, z, .85, .42, .85, col, { mat: 'fabric', stab: .3, yaw: rand(0, 1) });
+  addB(O, x, .42, z + .05, .7, .18, .65, col, { mat: 'fabric', stab: .3, yaw: rand(0, 1), on: [b] });
+}
+function cafeChair(x, z, yaw) {
+  const f = frame(x, z, yaw), O = obj('카페 의자', 210000), col = pick([C.pink, 0xffffff, 0x9fd8c4, 0x2f3237]);
+  const a = PF(O, f, -.18, 0, 0, .03, .45, .4, C.dark, { mat: 'metal', stab: .3 });
+  const b = PF(O, f, .18, 0, 0, .03, .45, .4, C.dark, { mat: 'metal', stab: .3 });
+  const s = PF(O, f, 0, .45, 0, .42, .04, .42, col, { stab: .3, on: [a, b] });
+  PF(O, f, 0, .49, .19, .42, .38, .04, col, { stab: .3, on: [s] });
+}
+function cafeTable(x, z) {
+  const O = obj('카페 테이블', 450000);
+  const b = addB(O, x, 0, z, .5, .03, .5, C.dark, { mat: 'metal', stab: .45 });
+  const p = addB(O, x, .03, z, .08, .7, .08, C.dark, { mat: 'metal', stab: .45, on: [b] });
+  const t = addB(O, x, .73, z, .85, .035, .85, 0xf4f1ec, { mat: 'stone', stab: .45, on: [p] });
+  for (let i = 0; i < 2; i++) addB(obj('테이크아웃 컵', 4500), x + rand(-.25, .25), .765, z + rand(-.25, .25), .08, .14, .08, pick([0xffffff, 0x6b4a33]), { mat: 'paper', stab: .1, on: [t] });
+  const a0 = rand(0, 6.28);
+  for (let i = 0; i < 3; i++) { const a = a0 + i * 2.094; cafeChair(x + Math.sin(a) * .78, z + Math.cos(a) * .78, a); }
+}
+function whiteboard(x, z, yaw) {
+  const WB = obj('화이트보드', 260000), f = frame(x, z, yaw);
+  const a = PF(WB, f, -.92, 0, 0, .04, 1.95, .04, C.leg, { mat: 'metal', stab: .4 });
+  const b = PF(WB, f, .92, 0, 0, .04, 1.95, .04, C.leg, { mat: 'metal', stab: .4 });
+  PF(WB, f, 0, .85, 0, 1.8, 1.1, .03, 0xfbfbfb, { stab: .4, on: [a, b] });
+}
+function printer(x, z) {
+  const O = obj('복합기', 3800000);
+  const b = addB(O, x, 0, z, .62, .55, .58, 0xd9dbde, { mat: 'elec', stab: .5 });
+  const t = addB(O, x, .55, z, .6, .12, .5, 0x9a9da3, { mat: 'elec', stab: .5, on: [b] });
+  addB(O, x, .67, z + .05, .35, .02, .25, 0xffffff, { mat: 'paper', stab: .2, on: [t] });
+}
+
+// ---------- 타워 골격 ----------
+const APR_COLS = [[-2.5, -8.1], [2.9, -8.1], [-8.3, -4.2], [-8.3, 3.4], [7.9, 3.4]];
+const genericCols = (W, D) => [-1, 0, 1].flatMap(i => [-1, 1].map(j => [i * (W / 2 - 6), j * (D / 2 - 5.5)]));
+function nearestCols(F, x, z) {
+  return F.cols.map(c => [c, Math.hypot(c.pos.x - x, c.pos.z - z)]).sort((a, b) => a[1] - b[1]).slice(0, 3).map(a => a[0]);
+}
+function aprZoneColor(x, z) {
+  if (x < -4.2 && z > 4.6) return 0xc9a57c;
+  if ((x > 8 && z > 4.6) || (x < -8.6 && z < -.6)) return 0xe9e6e1;
+  if (x > 8 && z < -5.4) return 0x666a73;
+  return C.slab;
+}
+function buildFloor(k) {
+  const roof = k === NF, [W, D] = plate(Math.min(k, NF - 1)), y = k * FH;
+  const F = { k, W, D, y, x0: -W / 2, z0: -D / 2, nx: Math.max(2, Math.round(W / 4.8)), nz: Math.max(2, Math.round(D / 4.7)), tiles: [], cols: [], populated: roof };
+  F.tw = W / F.nx; F.td = D / F.nz;
+  floors[k] = F;
+  curFloor = k; baseY = y;
+  const SL = obj(roof ? '옥상 슬래브' : '바닥 슬래브', 40000000);
+  for (let iz = 0; iz < F.nz; iz++) for (let ix = 0; ix < F.nx; ix++) {
+    const cx = F.x0 + F.tw * (ix + .5), cz = F.z0 + F.td * (iz + .5);
+    const col = k === 0 ? 0xe9e6e1 : k === APR_K ? aprZoneColor(cx, cz) : roof ? 0x8f8c86 : C.slab;
+    const t = addB(SL, cx, -.45, cz, F.tw - .02, .45, F.td - .02, new THREE.Color(col).offsetHSL(0, 0, rand(-.015, .015)), {
+      mat: 'concrete', stab: .92, free: true, tile: true, on: k ? nearestCols(floors[k - 1], cx, cz) : [],
+    });
+    F.tiles.push(t);
+  }
+  if (roof) {
+    const P = obj('옥상 난간', 6000000);
+    for (const [sx, sz, x, z] of [[W, .3, 0, F.z0 + .15], [W, .3, 0, -F.z0 - .15], [.3, D, F.x0 + .15, 0], [.3, D, -F.x0 - .15, 0]]) {
+      const n = Math.max(1, Math.round(Math.max(sx, sz) / 4.8));
+      for (let i = 0; i < n; i++) {
+        const along = sx > sz, px = along ? -W / 2 + W / n * (i + .5) : x, pz = along ? z : -D / 2 + D / n * (i + .5);
+        addB(P, px, 0, pz, along ? W / n - .02 : .3, 1.1, along ? .3 : D / n - .02, C.spandrel, { mat: 'metal', stab: .8, free: true, solid: true, on: [tileAt(k, px, pz, true)] });
+      }
+    }
+    return F;
+  }
+  for (const [x, z] of k === APR_K ? APR_COLS : genericCols(W, D)) {
+    const c = addB(obj('건물 기둥', 120000000), x, 0, z, .8, FH - .45, .8, C.concrete, { mat: 'concrete', stab: .85, solid: true, free: true, on: [tileAt(k, x, z, true)] });
+    c.isCol = true;
+    F.cols.push(c);
+  }
+  const span = k === APR_K ? C.pink : C.spandrel;
+  for (const [along, edge] of [['x', F.z0], ['x', -F.z0], ['z', F.x0], ['z', -F.x0]]) {
+    const len = along === 'x' ? W : D, n = Math.max(2, Math.round(len / 3)), w = len / n;
+    for (let i = 0; i < n; i++) {
+      const c = -len / 2 + w * (i + .5);
+      const [x, z] = along === 'x' ? [c, edge] : [edge, c];
+      const t = tileAt(k, x - Math.sign(along === 'z' ? edge : 0) * .5, z - Math.sign(along === 'x' ? edge : 0) * .5, true);
+      const [sx, sz] = along === 'x' ? [w, .22] : [.22, w];
+      addB(obj('외벽 패널', 2200000), x, -.45, z, sx, .75, sz, span, { mat: 'metal', stab: .8, solid: true, free: true, fac: k, on: [t] });
+      const [gx, gz] = along === 'x' ? [w - .06, .06] : [.06, w - .06];
+      addB(obj('커튼월 유리', 4800000), x, .3, z, gx, FH - .75, gz, new THREE.Color(C.facade).offsetHSL(0, 0, rand(-.03, .03)), { b: 'f', mat: 'glass', stab: .6, solid: true, free: true, fac: k, on: [t] });
+    }
+  }
+  return F;
+}
+function buildCrown() {
+  const R = floors[NF];
+  curFloor = NF; baseY = R.y;
+  let w = R.W * .8, d = R.D * .8, y = 0;
+  let below = [tileAt(NF, -w / 4, 0, true), tileAt(NF, w / 4, 0, true), tileAt(NF, 0, -d / 4, true), tileAt(NF, 0, d / 4, true)];
+  for (let j = 0; j < 4; j++) {
+    const h = 7 - j * .8;
+    const core = addB(obj('왕관부 철골', 60000000), 0, y, 0, w * .55, h, d * .55, 0x6f7f8c, { mat: 'metal', stab: .75, free: true, solid: true, on: below });
+    addB(obj('왕관부 유리 구조물', 30000000), 0, y, 0, w, h, d, 0xbcd6e4, { b: 'f', mat: 'glass', stab: .7, free: true, on: below });
+    below = [core];
+    w *= .7; d *= .7; y += h;
+  }
+  addB(obj('첨탑', 5000000000), 0, y, 0, .9, 24, .9, 0xd9dde2, { mat: 'metal', stab: .7, free: true, on: below });
+}
+
+// ---------- APR 본사층 (처음부터 채워 둔다) ----------
+function aprPod(cx, cz) {
+  for (const side of [1, -1]) {
+    const yaw = side > 0 ? 0 : Math.PI;
+    for (const dx of [-1.42, 0, 1.42]) {
+      const f = desk(cx + dx, cz + side * .37, yaw);
+      const [wx, wz] = toW(f, rand(-.1, .1), rand(.78, .92));
+      chair(wx, wz, yaw + rand(-.35, .35), Math.random() < .25 ? C.pink : pick([0x3a3f47, 0x4a505a, 0x2f3237]));
+    }
+  }
+  pendant(cx, cz, 4.3);
+}
+function meetingRooms() {
+  const z0 = -12.65, z1 = -5.4;
+  glassRun(8, 11.55, z1, 'x');
+  glassRun(12.85, 16.25, z1, 'x');
+  glassRun(z0, z1, 8, 'z');
+  const DW = obj('회의실 가벽', 1200000), segs = [];
+  for (let i = 0; i < 3; i++) {
+    const za = z0 + (z1 - z0) * i / 3, zb = z0 + (z1 - z0) * (i + 1) / 3;
+    segs.push(addB(DW, 12.8, 0, (za + zb) / 2, .12, 2.7, zb - za - .01, 0xf1efeb, { mat: 'stone', stab: .8, solid: true }));
+  }
+  tv(12.71, -9, -Math.PI / 2, segs[1]);
+  tvStand(17.2, -9, -Math.PI / 2);
+  meetTable(10.4, -9);
+  meetTable(15.25, -9);
+  pendant(10.4, -9, 2.6, Math.PI / 2);
+  pendant(15.25, -9, 2.6, Math.PI / 2);
+  plant(8.5, -12.2, .8);
+}
+function lounge() {
+  sofa(16.9, -.6, Math.PI / 2, 2.4, 0x59616d);
+  coffeeTable(15.5, -.6, Math.PI / 2);
+  beanbag(14, -2.8); beanbag(14, 1.6); beanbag(15.2, -3.9);
+  plant(17.2, 3, 1.1); plant(17.2, -4.1); plant(10.5, -3.2, .8);
+  bin(9.6, -1.2);
+  whiteboard(10.6, 1.6, 0);
+}
+// 5×7 도트 글자로 쌓은 APR 로고. 블록 하나하나가 따로 부서진다
+const FONT = {
+  A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+  P: ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
+  R: ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
+};
+function reception() {
+  const W = obj('APR 로고 사인월', 15000000), cx = 12.9, wz = 5.0, segW = 7.4 / 4, segs = [];
+  for (let i = 0; i < 4; i++) segs.push(addB(W, 9.2 + segW * (i + .5), 0, wz, segW - .01, 3, .3, 0xf6f5f3, { mat: 'stone', stab: .8, solid: true }));
+  const px = .27;
+  ['A', 'P', 'R'].forEach((ch, li) => {
+    const L = obj(`APR 로고 ${ch}`, 2000000);
+    FONT[ch].forEach((row, r) => [...row].forEach((on, c) => {
+      if (on !== '#') return;
+      const col = li * 6 + c, x = cx + (col - 8) * px, y = .75 + (6 - r) * px;
+      const seg = segs[clamp(Math.floor((x - 9.2) / segW), 0, 3)];
+      addB(L, x, y, wz + .15 + .06, px - .01, px - .01, .12, 0x141414, { stab: .45, on: [seg] });
+    }));
+  });
+  addB(obj('사인월 조명', 450000), cx, 2.82, wz + .17, 6.6, .05, .04, 0xfff3e6, { b: 'e', stab: .5, on: [segs[1], segs[2]] });
+
+  const R = obj('안내 데스크', 3500000), dz = 7.6;
+  const front = addB(R, cx, 0, dz + .32, 3.4, 1.05, .08, 0xfafafa, { stab: .55 });
+  const sl = addB(R, cx - 1.66, 0, dz, .08, 1.05, .7, 0xfafafa, { stab: .55 });
+  const sr = addB(R, cx + 1.66, 0, dz, .08, 1.05, .7, 0xfafafa, { stab: .55 });
+  const top = addB(R, cx, 1.05, dz, 3.5, .05, .8, 0xf0ece6, { mat: 'stone', stab: .55, on: [front, sl, sr] });
+  addB(R, cx, .06, dz + .37, 3.3, .03, .02, C.pink, { b: 'e', stab: .55, on: [front] });
+  const df = frame(cx, dz, Math.PI);
+  monitor(df, .6, 1.1, -.05, 0, top);
+  PF(obj('전화기', 180000), df, -.5, 1.1, .05, .2, .06, .18, C.dark, { stab: .12, on: [top] });
+  product(df, -1.2, 1.1, .1, top, PAL[0]);
+  product(df, -1.05, 1.1, .12, top, PAL[0]);
+  chair(cx, 6.6, Math.PI, C.pink);
+
+  const S = obj('대형 뷰티 디바이스 모형', 5000000);
+  const sb = addB(S, 9.2, 0, 9.6, .8, .3, .8, 0xffffff, { stab: .5 });
+  const sh = addB(S, 9.2, .3, 9.6, .42, 1.6, .32, 0xf4f3f0, { mat: 'elec', stab: .5, on: [sb] });
+  const hd = addB(S, 9.2, 1.9, 9.6, .72, .4, .44, C.pink, { mat: 'elec', stab: .5, on: [sh] });
+  addB(S, 9.2, 2.0, 9.6 + .23, .5, .18, .02, 0xffe3ee, { b: 'e', stab: .5, on: [hd] });
+
+  for (const z of [8.6, 10.9]) {
+    const P = obj('제품 진열대', 800000), pf = frame(16.4, z, -Math.PI / 2);
+    const pl = PF(P, pf, 0, 0, 0, .8, .9, .8, 0xffffff, { stab: .5 });
+    for (let i = 0; i < 4; i++) product(pf, -.28 + i * .19, .9, rand(-.15, .15), pl, PAL[i % 2 ? 0 : 1]);
+  }
+  sofa(12.9, 11.9, 0, 2.2, 0xe8e2da);
+  plant(9.1, 12.3); plant(16.9, 12.3, .9);
+}
+function pantry() {
+  for (let i = 0; i < 4; i++) {
+    const x = -16.8 + 1.75 * (i + .5), O = obj('탕비실 수납장', 700000);
+    const cab = addB(O, x, 0, 12.25, 1.72, .86, .62, i % 2 ? 0xe7ddd0 : 0xf3f1ec, { mat: 'wood', stab: .55 });
+    const top = addB(O, x, .86, 12.22, 1.75, .04, .66, 0xf3f1ec, { mat: 'stone', stab: .55, on: [cab] });
+    if (i === 0) for (let k = 0; k < 4; k++) addB(obj('간식 박스', 30000), x - .6 + k * .38, .9, 12.2, .3, rand(.12, .25), .22, pick([0xf2c14e, 0xff7aa2, 0x6cbfa3, 0xff8a3d]), { mat: 'paper', stab: .12, yaw: rand(-.3, .3), on: [top] });
+    if (i === 1) {
+      const M = obj('커피 머신', 6500000);
+      const b = addB(M, x - .3, .9, 12.2, .42, .55, .42, 0x1d1f24, { mat: 'metal', stab: .2, on: [top] });
+      addB(M, x - .3, 1.12, 12.2 - .22, .3, .06, .03, 0x7ee0ff, { b: 'e', stab: .2, on: [b] });
+      for (let k = 0; k < 3; k++) addB(obj('머그컵', 15000), x + .2 + k * .14, .9, 12.05, .08, .1, .08, 0xffffff, { mat: 'ceramic', stab: .1, on: [top] });
+    }
+    if (i === 2) {
+      const Mw = obj('전자레인지', 250000);
+      const b = addB(Mw, x, .9, 12.25, .5, .3, .38, 0x2b2d33, { mat: 'metal', stab: .2, on: [top] });
+      addB(Mw, x + .17, 1.0, 12.06, .08, .05, .01, 0x8affc1, { b: 'e', stab: .2, on: [b] });
+    }
+    if (i === 3) for (let k = 0; k < 5; k++) addB(obj('종이컵', 300), x - .5 + k * .2, .9, 12.1, .07, .09, .07, 0xffffff, { mat: 'paper', stab: .1, on: [top] });
+  }
+  addB(obj('냉장고', 2300000), -9.2, 0, 12.2, .8, 1.85, .72, 0xc5c9ce, { mat: 'metal', stab: .6, solid: true });
+  const D = obj('음료 냉장고', 1900000);
+  const d = addB(D, -8.2, 0, 12.2, .75, 1.9, .7, 0x24262b, { mat: 'metal', stab: .6, solid: true });
+  addB(D, -8.2, .15, 12.2 - .36, .6, 1.6, .02, 0xcff6ff, { b: 'e', stab: .6, on: [d] });
+  addB(obj('정수기', 900000), -7.3, 0, 12.3, .32, 1.15, .4, 0xfafafa, { stab: .35 });
+  cafeTable(-15.2, 7.8); cafeTable(-12, 8.6); cafeTable(-8.8, 7.4);
+  pendant(-12, 8.2, 3.2);
+  plant(-17.1, 5.2); plant(-4.8, 12.3, .9);
+  bin(-6.6, 12.4);
+}
+function shelfUnit(cx, cz, theme) {
+  const f = frame(cx, cz, 0), O = obj('쇼룸 진열장', 1250000), W = 2.6, H = 2.1, Dp = .45;
+  const back = PF(O, f, 0, 0, -Dp / 2 + .015, W, H, .03, 0xf4f2ef, { mat: 'wood', stab: .5, solid: true });
+  const sL = PF(O, f, -W / 2 + .02, 0, 0, .04, H, Dp, 0xe9e6e1, { mat: 'wood', stab: .5 });
+  const sR = PF(O, f, W / 2 - .02, 0, 0, .04, H, Dp, 0xe9e6e1, { mat: 'wood', stab: .5 });
+  PF(obj('브랜드 사인 조명', 450000), f, 0, H + .01, -.1, W - .2, .1, .05, C.pink, { b: 'e', stab: .4, on: [back] });
+  [.06, .48, .9, 1.32, 1.74].forEach((y, i) => {
+    const sh = PF(O, f, 0, y, .01, W - .08, .03, Dp - .04, 0xfbfaf8, { mat: 'wood', stab: .5, on: [sL, sR] });
+    const pal = PAL[(theme + i) % PAL.length];
+    let x = -W / 2 + .16;
+    while (x < W / 2 - .2) x += product(f, x, y + .03, rand(-.08, .06), sh, pal) + rand(.05, .11);
+  });
+}
+function displayTable(cx, cz) {
+  const f = frame(cx, cz, 0), O = obj('쇼룸 진열 테이블', 1250000);
+  const a = PF(O, f, -.82, 0, 0, .06, .85, .7, 0xffffff, { stab: .5 });
+  const b = PF(O, f, .82, 0, 0, .06, .85, .7, 0xffffff, { stab: .5 });
+  const top = PF(O, f, 0, .85, 0, 1.8, .05, .8, 0xffffff, { stab: .5, on: [a, b] });
+  for (const lz of [-.22, .2]) { let x = -.75; while (x < .7) x += product(f, x, .9, lz + rand(-.04, .04), top) + rand(.08, .16); }
+}
+function showroom() {
+  shelfUnit(-15.4, -10.2, 0); shelfUnit(-12.6, -10.2, 1);
+  shelfUnit(-15.4, -5.6, 2); shelfUnit(-12.6, -5.6, 3);
+  displayTable(-15, -2.6); displayTable(-11.6, -2.6);
+  pendant(-14, -2.6, 4.6);
+  plant(-17.1, -12.2); plant(-9.2, -12.2, .9); plant(-17.1, -.9, .9);
+  whiteboard(-9.7, -8.3, Math.PI / 2);
+}
+function buildAprFloor() {
+  curFloor = APR_K; baseY = APR_Y;
+  floors[APR_K].populated = true;
+  for (const z of [-10.2, -6, -1.8]) for (const x of [-5.2, .2, 5.6]) aprPod(x, z);
+  for (const x of [-1, 4.4]) aprPod(x, 8.5);
+  meetingRooms();
+  lounge();
+  reception();
+  pantry();
+  showroom();
+  printer(.2, 4.4); printer(5.6, 4.4);
+  bin(-2.5, 4.6); bin(2.9, 4.6); bin(7.2, 6.2);
+  plant(-3.6, 11.9, .9); plant(6.9, 11.9, .9);
+}
+
+// ---------- 일반 층: 부수기 시작하면 그때 채운다 ----------
+function simpleChair(x, z, yaw) {
+  const f = frame(x, z, yaw), O = obj('사무용 의자', 1290000), col = Math.random() < .2 ? C.pink : pick([0x3a3f47, 0x4a505a, 0x2f3237]);
+  const base = PF(O, f, 0, 0, 0, .56, .05, .56, C.dark, { mat: 'metal', stab: .3 });
+  const post = PF(O, f, 0, .05, 0, .06, .36, .06, 0x8b8f96, { mat: 'metal', stab: .3, on: [base] });
+  const seat = PF(O, f, 0, .41, 0, .5, .08, .48, col, { mat: 'fabric', stab: .3, on: [post] });
+  PF(O, f, 0, .49, .22, .46, .56, .06, col, { mat: 'fabric', stab: .3, on: [seat] });
+}
+function simpleDesk(cx, cz, yaw) {
+  const f = frame(cx, cz, yaw), D = obj('사무용 책상', 420000);
+  const l1 = PF(D, f, -.67, 0, 0, .04, .7, .64, C.leg, { mat: 'metal', stab: .55 });
+  const l2 = PF(D, f, .67, 0, 0, .04, .7, .64, C.leg, { mat: 'metal', stab: .55 });
+  const top = PF(D, f, 0, .7, 0, 1.42, .03, .72, C.desk, { mat: 'wood', stab: .55, on: [l1, l2] });
+  const M = obj('27인치 모니터', 350000);
+  const bz = PF(M, f, 0, .73, -.2, .58, .36, .04, 0x1b1c20, { mat: 'elec', stab: .22, on: [top] });
+  PF(M, f, 0, .75, -.178, .54, .3, .006, pick(SCREEN), { b: 'e', stab: .22, on: [bz] });
+  if (Math.random() < .7) PF(obj('키보드·마우스', 248000), f, 0, .73, .12, .44, .02, .14, 0x2b2d33, { stab: .12, on: [top] });
+  if (Math.random() < .3) PF(obj('머그컵', 15000), f, rand(-.6, -.45), .73, rand(0, .2), .08, .1, .08, pick([0xffffff, 0xff7aa2, 0x222428]), { mat: 'ceramic', stab: .1, on: [top] });
+  const [wx, wz] = toW(f, rand(-.1, .1), rand(.8, .95));
+  simpleChair(wx, wz, yaw + rand(-.3, .3));
+}
+function populate(k) {
+  const F = floors[k];
+  if (!F || F.populated) return;
+  F.populated = true;
+  const pc = curFloor, pb = baseY;
+  curFloor = k; baseY = F.y;
+  const free = (x, z, r) => {
+    const t = tileAt(k, x, z);
+    return t && t.alive && !t.dyn && Math.abs(x) < F.W / 2 - r - .4 && Math.abs(z) < F.D / 2 - r - .4
+      && !F.cols.some(c => Math.abs(c.pos.x - x) < r + .45 && Math.abs(c.pos.z - z) < r + .45);
+  };
+  for (let x = F.x0 + 3; x < F.x0 + F.W - 2; x += 6) for (let z = F.z0 + 3; z < F.z0 + F.D - 2; z += 6) {
+    const t = tileAt(k + 1, x, z);
+    if (t && t.alive && !t.dyn) addB(obj('천장 조명', 250000), x, 3.08, z, 1.2, .04, .6, 0xfff4e0, { b: 'e', stab: .35, free: true, on: [t] });
+  }
+  const kind = k === 0 ? 'lobby' : pick(['office', 'office', 'office', 'meeting', 'lounge']);
+  if (kind === 'office') {
+    for (let z = F.z0 + 3.2; z < F.z0 + F.D - 3; z += 5.2) for (let x = F.x0 + 3; x < F.x0 + F.W - 3; x += 4.4) {
+      if (Math.random() < .82 && free(x, z, 1.6)) { simpleDesk(x, z - .37, 0); simpleDesk(x, z + .37, Math.PI); }
+    }
+  } else if (kind === 'meeting') {
+    for (let z = F.z0 + 4; z < F.z0 + F.D - 3; z += 7) for (let x = F.x0 + 4; x < F.x0 + F.W - 3; x += 6.5) {
+      if (free(x, z, 2.3)) { meetTable(x, z); if (Math.random() < .5 && free(x + 2.4, z, .5)) whiteboard(x + 2.4, z, Math.PI / 2); }
+    }
+  } else if (kind === 'lounge') {
+    for (let i = 0; i < 26; i++) {
+      const x = rand(F.x0 + 2, F.x0 + F.W - 2), z = rand(F.z0 + 2, F.z0 + F.D - 2);
+      if (!free(x, z, 1.4)) continue;
+      const r = Math.random();
+      if (r < .3) cafeTable(x, z);
+      else if (r < .5) sofa(x, z, pick([0, Math.PI / 2, Math.PI]), 2.2, pick([0x59616d, 0xe8e2da, C.pinkSoft]));
+      else if (r < .75) beanbag(x, z);
+      else plant(x, z, rand(.8, 1.2));
+    }
+  } else {
+    const R = obj('로비 안내 데스크', 6000000);
+    const front = addB(R, 0, 0, 2.2, 6, 1.05, .1, 0xfafafa, { stab: .55 });
+    addB(R, 0, 1.05, 2.5, 6.2, .06, .8, 0x2b2d33, { mat: 'stone', stab: .55, on: [front] });
+    for (const x of [-12, 12]) for (const z of [-6, 6]) if (free(x, z, 1.4)) sofa(x, z, z > 0 ? 0 : Math.PI, 2.4, 0x3f454f);
+    for (let i = -3; i <= 3; i++) if (free(i * 1.6, -7, .4)) addB(obj('보안 게이트', 4500000), i * 1.6, 0, -7, .18, 1.0, 1.2, 0xc9ccd1, { mat: 'metal', stab: .5 });
+  }
+  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const x = sx * (F.W / 2 - 1.5), z = sz * (F.D / 2 - 1.5);
+    if (free(x, z, .4)) plant(x, z, rand(.8, 1.1));
+  }
+  curFloor = pc; baseY = pb;
+}
+function populateNear(c, R) {
+  for (let k = 0; k < NF; k++) {
+    const F = floors[k];
+    if (F.populated || c.y + R < F.y - .5 || c.y - R > F.y + FH) continue;
+    if (Math.abs(c.x) > F.W / 2 + R || Math.abs(c.z) > F.D / 2 + R) continue;
+    if (totalCount() > SOFTCAP - 4000) return;
+    populate(k);
+  }
+}
+
+function buildWorld() {
+  for (let k = 0; k <= NF; k++) buildFloor(k);
+  buildCrown();
+  buildAprFloor();
+  curFloor = -1; baseY = 0;
+}
+
+// ---------- 도구 ----------
+const tasks = [];
+// 슬래브·기둥은 폭심 가까이(반경의 안쪽 45%)에서만 부서진다. 가장자리에 걸렸다고 통째로 무너지지 않게
+const STRUCT_F = .55;
+const isStructure = b => b.isTile || b.isCol;
+const toolScale = c => clamp(camera.position.distanceTo(c) / 70, 1, 1.4);
+function explode(c, R, P, { up = .45, fineR = .55, fracR = .8 } = {}) {
+  for (const [b, d] of near(c, R)) {
+    if (!b.alive) continue;
+    const f = 1 - d / R;
+    if (isStructure(b) && f < STRUCT_F) continue;
+    let ps = [b];
+    if (b.glass || (f > 1 - fracR && maxHalf(b) > .14)) ps = fracture(b, f > 1 - fineR);
+    for (const p of ps) {
+      _v.subVectors(p.pos, c); _v.y += up * R * rand(.5, 1);
+      if (_v.lengthSq() < 1e-6) _v.set(0, 1, 0);
+      _v.normalize();
+      const sp = P * Math.pow(f, 1.3) * massFactor(p) * rand(.7, 1.2);
+      release(p, _v.x * sp, _v.y * sp, _v.z * sp, 4 + sp * .8);
+      if (f > .6) char(p, (f - .6) * 1.2);
+    }
+  }
+}
+function bomb(c) {
+  const s = toolScale(c), R = 2.8 * s;
+  populateNear(c, R + 1);
+  explode(c, R, 15);
+  blastFx(c, R);
+  addShake(.35); sfx.boom(s);
+  addDecal(c.x, c.y, c.z, R * .7, 'scorch');
+}
+
+function makeHammer(F, s) {
+  const g = new THREE.Group(), L = 3.4 * s;
+  const wood = new THREE.MeshStandardMaterial({ color: 0x8a5a33, roughness: .6, transparent: true });
+  const steel = new THREE.MeshStandardMaterial({ color: 0x3a3d44, roughness: .35, metalness: .7, transparent: true });
+  const band = new THREE.MeshStandardMaterial({ color: C.pink, roughness: .4, transparent: true });
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(.09 * s, .12 * s, L, 12), wood);
+  handle.position.y = L / 2;
+  const head = new THREE.Group();
+  head.position.y = L;
+  head.quaternion.setFromUnitVectors(new V3(0, 0, 1), F);
+  head.add(new THREE.Mesh(new THREE.BoxGeometry(.75 * s, .75 * s, 1.3 * s), steel), new THREE.Mesh(new THREE.BoxGeometry(.78 * s, .78 * s, .22 * s), band));
+  g.add(handle, head);
+  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  return { g, L, mats: [wood, steel, band] };
+}
+function hammer(c) {
+  const s = toolScale(c);
+  const F = _v.subVectors(c, camera.position).setY(0);
+  if (F.lengthSq() < 1e-6) F.set(0, 0, -1);
+  F.normalize();
+  const fwd = F.clone(), H = makeHammer(fwd, s);
+  const pivot = new V3(c.x - fwd.x * H.L, c.y + .35 * s, c.z - fwd.z * H.L);
+  const axis = new V3().crossVectors(_up, fwd).normalize();
+  H.g.position.copy(pivot); scene.add(H.g);
+  sfx.swoosh();
+  let t = 0, hit = false;
+  const T = .26;
+  tasks.push({
+    update(rdt, dt) {
+      t += dt;
+      const th = t < T ? -.5 + (Math.PI / 2 + .5) * (t / T) * (t / T) : Math.PI / 2;
+      if (t >= T && !hit) { hit = true; hammerHit(c, fwd, s); }
+      H.g.quaternion.setFromAxisAngle(axis, th);
+      if (t > T + .35) {
+        const k = Math.min(1, (t - T - .35) / .3);
+        H.g.position.y = pivot.y + k * 3 * s;
+        for (const m of H.mats) m.opacity = 1 - k;
+        if (k >= 1) { this.kill(); return false; }
+      }
+      return true;
+    },
+    kill() { scene.remove(H.g); },
+  });
+}
+function hammerHit(c, F, s) {
+  const R = 2.4 * s;
+  populateNear(c, R);
+  for (const [b, d] of near(c, R)) {
+    if (!b.alive) continue;
+    const f = 1 - d / R;
+    if (isStructure(b) && f < STRUCT_F) continue;
+    const ps = b.glass || (d < 1 * s && maxHalf(b) > .09) ? fracture(b, true) : [b];
+    for (const p of ps) {
+      _v.subVectors(p.pos, c).setY(0);
+      const hl = _v.length() || 1; _v.divideScalar(hl);
+      const sp = 12 * Math.pow(f, 1.2) * massFactor(p) * rand(.7, 1.2);
+      const below = p.pos.y < c.y + .3;
+      release(p, (_v.x * .75 + F.x * .6) * sp, below ? sp * .35 : -sp * .6, (_v.z * .75 + F.z * .6) * sp, 3 + sp * .5);
+    }
+  }
+  addShake(.45); sfx.thud(1); sfx.boom(.35 * s);
+  shock(c, 3 * s, .4);
+  for (let i = 0; i < 40; i++) {
+    const a = rand(0, 6.28);
+    smoke.emit(c.x, c.y + .1, c.z, Math.cos(a) * rand(2, 5) * s, rand(.3, 1.5), Math.sin(a) * rand(2, 5) * s, rand(.8, 1.6), .4 * s, 1.6 * s, [.6, .57, .53], [.72, .7, .66], .5, -.2, 2.5);
+  }
+  addDecal(c.x, c.y, c.z, 1.6 * s, 'crack');
+}
+
+function burn(p) {
+  populateNear(p, .8);
+  for (const [b] of near(p, .55)) {
+    if (!b.alive) continue;
+    const ps = maxHalf(b) > .07 ? fracture(b, true) : [b];
+    for (const q of ps) {
+      if (boxDist(q, p) < .4) { char(q, .8); release(q, rand(-1.5, 1.5), rand(2, 5), rand(-1.5, 1.5), 7); }
+      else release(q, rand(-.3, .3), 0, rand(-.3, .3), 1);
+    }
+  }
+  for (let i = 0; i < 14; i++) fire.emit(p.x, p.y + .05, p.z, rand(-3, 3), rand(1, 6), rand(-3, 3), rand(.3, .7), .16, .05, [2.6, 2.1, 1.4], [2.2, .5, .7], 1, 9, .6);
+  smoke.emit(p.x, p.y + .2, p.z, rand(-.3, .3), rand(1, 2), rand(-.3, .3), rand(1, 2), .3, 1.2, [.25, .22, .22], [.5, .48, .48], .5, -.4, 1.5);
+  addDecal(p.x, p.y, p.z, .45, 'glow');
+}
+const beamGeo = new THREE.CylinderGeometry(1, 1, 1, 16, 1, true);
+function laserRun(pts) {
+  const path = [pts[0].clone()];
+  for (let i = 1; i < pts.length; i++) {
+    const a = path[path.length - 1], d = a.distanceTo(pts[i]);
+    if (d < .05) continue;
+    const n = Math.ceil(d / .25);
+    for (let k = 1; k <= n; k++) path.push(a.clone().lerp(pts[i], k / n));
+  }
+  const cum = [0];
+  for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + path[i - 1].distanceTo(path[i]));
+  const total = cum[cum.length - 1], T = Math.max(.35, Math.min(3, total / 12));
+  const at = s => {
+    let i = 1;
+    while (i < cum.length && cum[i] < s) i++;
+    if (i >= cum.length) return path[path.length - 1];
+    const k = (s - cum[i - 1]) / Math.max(1e-6, cum[i] - cum[i - 1]);
+    return path[i - 1].clone().lerp(path[i], k);
+  };
+  const origin = new V3(-90, 230, -120);
+  const layers = [[.07, 0xffffff, 1], [.22, 0xff5c9a, .85], [.6, 0xff3d7f, .28]].map(([r, col, op]) => {
+    const m = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+    m.visible = false; m.userData = { r, op }; scene.add(m);
+    return m;
+  });
+  const orb = new THREE.Mesh(fbGeo, new THREE.MeshBasicMaterial({ color: 0xff7aa8, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+  orb.position.copy(origin); scene.add(orb);
+  const setBeam = p => {
+    _v.subVectors(p, origin);
+    const len = _v.length();
+    _q.setFromUnitVectors(_up, _v.clone().normalize());
+    for (const m of layers) {
+      m.visible = true; m.position.copy(origin).addScaledVector(_v, .5); m.quaternion.copy(_q);
+      const r = m.userData.r * (1 + Math.sin(performance.now() * .05) * .12);
+      m.scale.set(r, len, r);
+    }
+  };
+  sfx.charge();
+  let phase = 'charge', t = 0, burned = -.25, boomAt = 0;
+  tasks.push({
+    update(rdt, dt) {
+      t += dt;
+      if (phase === 'charge') {
+        dimTarget = .45; orb.material.opacity = Math.min(1, t / .55); orb.scale.setScalar(2 + t * 10);
+        if (t > .55) { phase = 'fire'; t = 0; sfx.zap(T); addShake(.12); }
+        return true;
+      }
+      if (phase === 'fire') {
+        const dd = Math.min(total, t / T * total);
+        setBeam(at(dd));
+        while (burned + .25 <= dd + 1e-6) {
+          burned += .25;
+          const q = at(burned);
+          burn(q);
+          if (burned >= boomAt) { boomAt += 1.2; explode(q, 1.4, 6); fireball(q, 1, .35); sfx.boom(.3); }
+        }
+        addShake(.06);
+        if (t >= T) { phase = 'fade'; t = 0; }
+        return true;
+      }
+      dimTarget = 0;
+      const k = Math.min(1, t / .3);
+      for (const m of layers) m.material.opacity = m.userData.op * (1 - k);
+      orb.material.opacity = 1 - k;
+      if (k >= 1) { this.kill(); return false; }
+      return true;
+    },
+    kill() { for (const m of layers) { scene.remove(m); m.material.dispose(); } scene.remove(orb); orb.material.dispose(); dimTarget = 0; },
+  });
+}
+
+const rockGeo = (() => {
+  const g = new THREE.IcosahedronGeometry(1.5, 1), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { _v.fromBufferAttribute(p, i).multiplyScalar(rand(.8, 1.15)); p.setXYZ(i, _v.x, _v.y, _v.z); }
+  g.computeVertexNormals();
+  return g;
+})();
+function meteor(c) {
+  const start = new V3(c.x + 60, c.y + 110, c.z - 45);
+  const m = new THREE.Mesh(rockGeo, new THREE.MeshStandardMaterial({ color: 0x3b302a, roughness: .9, flatShading: true, emissive: 0x7a2a08 }));
+  const glow = new THREE.Mesh(fbGeo, new THREE.MeshBasicMaterial({ color: 0xff7a2a, transparent: true, opacity: .55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  glow.scale.setScalar(2.6); m.add(glow);
+  m.scale.setScalar(1.6);
+  m.position.copy(start); scene.add(m);
+  sfx.whistle(1.3); sfx.rumble(1.4, .5);
+  let t = 0;
+  const T = 1.4;
+  tasks.push({
+    update(rdt, dt) {
+      t += dt;
+      const k = Math.min(1, t / T);
+      m.position.lerpVectors(start, c, k * k * .55 + k * .45);
+      m.rotation.x += dt * 4; m.rotation.y += dt * 3;
+      for (let i = 0; i < 6; i++) fire.emit(m.position.x + rand(-1.5, 1.5), m.position.y + rand(-1.5, 1.5), m.position.z + rand(-1.5, 1.5), rand(-1, 1), rand(-1, 1), rand(-1, 1), rand(.3, .6), rand(3, 5), .6, FIRE0, FIRE1, 1, 0, 1);
+      for (let i = 0; i < 3; i++) smoke.emit(m.position.x, m.position.y, m.position.z, rand(-.5, .5), rand(-.5, .5), rand(-.5, .5), rand(1.5, 3), 2.5, 7, [.25, .2, .18], [.5, .48, .46], .6, -.2, .5);
+      if (k >= 1) { this.kill(); meteorImpact(c); return false; }
+      return true;
+    },
+    kill() { scene.remove(m); m.material.dispose(); glow.material.dispose(); },
+  });
+}
+function meteorImpact(c) {
+  populateNear(c, 8);
+  explode(c, 8, 26, { fineR: .5, fracR: .8 });
+  blastFx(c, 6);
+  fireball(c, 9, .9);
+  flashLight(c, 9000, .9);
+  for (let i = 0; i < 6; i++) {
+    const r = addBody({ x: c.x + rand(-1, 1), y: c.y + .8, z: c.z + rand(-1, 1), sx: rand(.6, 1.1), sy: rand(.5, 1), sz: rand(.6, 1.1), color: pick([0x3b302a, 0x2a2420, 0x4a3a30]), mat: 'rock', debris: true, dyn: true, yaw: rand(0, 6) });
+    if (r) release(r, rand(-6, 6), rand(4, 9), rand(-6, 6), 6);
+  }
+  addDecal(c.x, c.y, c.z, 6.5, 'scorch');
+  addShake(.9); slowmo(.35, .45, .6); sfx.boom(2.2);
+}
+
+let skipCine = false;
+function nuke(c) {
+  const start = new V3(c.x, c.y + 70, c.z);
+  const g = new THREE.Group();
+  const shell = new THREE.MeshStandardMaterial({ color: 0x4d5a3c, roughness: .5, metalness: .4 });
+  const yellow = new THREE.MeshStandardMaterial({ color: 0xf2c94c, roughness: .5 });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(.9, .9, 3.2, 20), shell);
+  const nose = new THREE.Mesh(new THREE.SphereGeometry(.9, 20, 12), shell); nose.position.y = -1.6;
+  const tail = new THREE.Mesh(new THREE.CylinderGeometry(.9, .35, 1.2, 20), shell); tail.position.y = 2.2;
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(.92, .92, .3, 20), yellow); band.position.y = .6;
+  g.add(body, nose, tail, band);
+  for (let i = 0; i < 4; i++) {
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(.06, .9, 1.3), shell);
+    fin.position.set(Math.sin(i * Math.PI / 2) * .5, 2.6, Math.cos(i * Math.PI / 2) * .5); fin.rotation.y = i * Math.PI / 2;
+    g.add(fin);
+  }
+  g.scale.setScalar(1.6);
+  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  g.position.copy(start); scene.add(g);
+  sfx.whistle(1.9);
+  toast('☢️ 핵폭탄이 떨어지고 있습니다 (Esc: 건너뛰기)');
+  let t = 0;
+  const T = 1.9;
+  tasks.push({
+    update(rdt, dt) {
+      t += dt * (skipCine ? 6 : 1);
+      const k = Math.min(1, t / T);
+      g.position.lerpVectors(start, c, k * k);
+      g.position.y += 2.5;
+      g.rotation.z = Math.sin(t * 6) * .05; g.rotation.x = Math.cos(t * 5) * .05;
+      if (k >= 1) { this.kill(); nukeImpact(c); return false; }
+      return true;
+    },
+    kill() { scene.remove(g); },
+  });
+}
+function nukeImpact(c) {
+  skipCine = false;
+  slowmo(.18, 1.5, 1.2); flash(1); addShake(1.6); sfx.nuke(); tint = 1;
+  const list = bodies.slice();
+  for (const b of list) {
+    if (!b.alive) continue;
+    const d = Math.max(.5, b.pos.distanceTo(c));
+    const ps = d < 9 || b.bk === BK.g ? fracture(b, d < 5) : [b];
+    for (const p of ps) {
+      _v.subVectors(p.pos, c); _v.y += rand(3, 7);
+      _v.normalize();
+      const sp = (8 + 55 * Math.exp(-d / 16)) * massFactor(p) * rand(.7, 1.2);
+      release(p, _v.x * sp, _v.y * sp, _v.z * sp, 10);
+      char(p, d < 14 ? .8 : .8 * Math.exp(-(d - 14) / 12));
+    }
+  }
+  fireball(c, 22, 3); fireball(c, 14, 2);
+  shock(c, 60, 1.6);
+  flashLight(c, 90000, 2.5);
+  addDecal(c.x, c.y, c.z, 14, 'scorch');
+  toast('☢️ 롯데월드타워가 증발했습니다');
+  let t = 0;
+  tasks.push({
+    update(rdt, dt) {
+      t += dt;
+      if (t > 8) return false;
+      const h = Math.min(90, 8 + t * 22), R = Math.min(38, 6 + t * 7);
+      const n = Math.floor(rand(0, 1) + dt * 240);
+      for (let i = 0; i < n; i++) {
+        const hot = t < 2.5, sys = hot ? fire : smoke;
+        const a = rand(0, 6.28), r = rand(0, 3.5 + t * .6);
+        sys.emit(c.x + Math.cos(a) * r, c.y + rand(0, h), c.z + Math.sin(a) * r, rand(-.5, .5), rand(2, 6), rand(-.5, .5), rand(3, 5.5), rand(3, 6), rand(9, 15), hot ? [1.4, .7, .25] : [.42, .32, .26], hot ? [.6, .15, .05] : [.3, .28, .27], hot ? .5 : .55, -.1, .3);
+        const b2 = rand(0, 6.28), rr2 = R * rand(.3, 1);
+        sys.emit(c.x + Math.cos(b2) * rr2, c.y + h + rand(-4, 6) * (rr2 / R), c.z + Math.sin(b2) * rr2, Math.cos(b2) * rand(.5, 2), rand(.5, 2), Math.sin(b2) * rand(.5, 2), rand(4, 7), rand(9, 13), rand(18, 26), hot ? [1.6, .8, .3] : [.45, .34, .27], hot ? [.7, .2, .05] : [.32, .3, .3], hot ? .45 : .55, -.05, .2);
+      }
+      return true;
+    },
+    kill() {},
+  });
+}
+
+let quake = null;
+function startQuake(c) {
+  const mag = +$('#mag').value, I = clamp((mag - 4) / 6, 0, 1);
+  quake = { c: c.clone(), mag, t: 0, dur: 3 + (mag - 4) * .35 };
+  for (const b of bodies) if (b.dyn) b.sleep = false;
+  sfx.rumble(quake.dur, .35 + I * .9);
+  toast(`〰️ 규모 ${mag.toFixed(1)} 지진 발생`);
+}
+function updateQuake(dt) {
+  if (!quake) return;
+  quake.t += dt;
+  const T = quake.dur;
+  if (quake.t >= T) { quake = null; return; }
+  const env = Math.min(1, quake.t / .4) * Math.min(1, (T - quake.t) / .8);
+  const I = clamp((quake.mag - 4) / 6, 0, 1), c = quake.c;
+  addShake(env * (.03 + .6 * I * I));
+  const L = bodies.length;
+  for (let i = 0; i < L; i++) {
+    const b = bodies[i];
+    if (!b.alive) continue;
+    if (!b.dyn) {
+      // 높은 층일수록 더 크게 흔들린다
+      const fall = Math.exp(-Math.hypot(b.pos.x - c.x, b.pos.z - c.z) / (8 + I * 60)) * (1 + b.pos.y / 160);
+      const over = I * env * fall * 1.25 - b.stab;
+      if (over > 0 && Math.random() < over * 5 * dt) {
+        if ((b.mass > 200 || b.glass) && over > .1) {
+          for (const p of fracture(b, false)) release(p, rand(-1, 1) * I * 3, rand(0, 1.5), rand(-1, 1) * I * 3, 3);
+        } else release(b, rand(-1, 1) * I * 2.5, rand(0, 1) * I * 2, rand(-1, 1) * I * 2.5, 2);
+      }
+    } else {
+      b.sleep = false;
+      b.vel.x += rand(-1, 1) * I * env * 14 * dt;
+      b.vel.z += rand(-1, 1) * I * env * 14 * dt;
+      if (Math.random() < I * env * 2 * dt) b.vel.y += rand(.5, 2) * I;
+    }
+  }
+}
+function quakeDesc(m) {
+  if (m < 5) return '물건이 살짝 흔들림';
+  if (m < 6) return '책상 위 물건이 떨어짐';
+  if (m < 7) return '모니터·의자·조명이 쓰러짐';
+  if (m < 8) return '유리가 깨지고 책상이 밀림';
+  if (m < 9) return '외벽과 기둥이 무너짐';
+  return '타워 전체 붕괴';
+}
+
+// ---------- 입력 ----------
+const TOOLS = [
+  { id: 'bomb', key: '1', icon: '💣', name: '폭탄', desc: '누른 곳을 폭파합니다. 멀리서 쓰면 폭발도 커집니다.' },
+  { id: 'hammer', key: '2', icon: '🔨', name: '해머', desc: '거대한 해머로 내려찍습니다. 멀리서 쓰면 해머도 커집니다.' },
+  { id: 'laser', key: '3', icon: '⚡', name: '레이저', desc: '화면을 끌어 선을 그으면 위성 레이저가 그 선을 훑고 지나갑니다. 톡 누르면 한 점만 태웁니다.' },
+  { id: 'meteor', key: '4', icon: '☄️', name: '운석', desc: '하늘에서 운석이 떨어져 큰 구멍을 냅니다.' },
+  { id: 'quake', key: '5', icon: '〰️', name: '지진', desc: '누른 곳이 진원입니다. 규모가 클수록 높은 층부터 무너집니다.' },
+  { id: 'nuke', key: '6', icon: '☢️', name: '핵폭탄', desc: '타워 전체를 날려 버립니다. 연출 중 Esc로 건너뜁니다.' },
+];
+let tool = 'bomb';
+const dock = $('#dock');
+for (const t of TOOLS) {
+  const b = document.createElement('button');
+  b.className = 'tool'; b.dataset.tool = t.id; b.title = `${t.name} (${t.key})`;
+  b.innerHTML = `<span class="ic">${t.icon}</span><span class="nm">${t.name}</span><kbd>${t.key}</kbd>`;
+  b.addEventListener('click', () => setTool(t.id));
+  dock.appendChild(b);
+}
+function setTool(id) {
+  tool = id;
+  dock.querySelectorAll('.tool').forEach(b => b.classList.toggle('on', b.dataset.tool === id));
+  $('#toolDesc').textContent = TOOLS.find(t => t.id === id).desc;
+  $('#quakeBox').hidden = id !== 'quake';
+  $('#toolInfo').classList.toggle('noq', id !== 'quake');
+  canvas.style.cursor = id === 'laser' ? 'crosshair' : 'pointer';
+}
+setTool('bomb');
+const magIn = $('#mag');
+function syncMag() { const m = +magIn.value; $('#magV').textContent = m.toFixed(1); $('#magDesc').textContent = quakeDesc(m); }
+magIn.addEventListener('input', syncMag);
+syncMag();
+
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+const floorPlane = new THREE.Plane(new V3(0, 1, 0), 0);
+function pickAt(x, y) {
+  ndc.set(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hits = ray.intersectObjects([BK.o.mesh, BK.f.mesh, BK.g.mesh, BK.e.mesh, plaza], false);
+  if (hits.length) {
+    const h = hits[0];
+    let body = null;
+    if (h.instanceId !== undefined) for (const k in BK) if (BK[k].mesh === h.object) body = BK[k].bodies[h.instanceId];
+    return { point: h.point.clone(), body };
+  }
+  const p = ray.ray.intersectPlane(floorPlane, new V3());
+  if (p && Math.hypot(p.x, p.z) < 400) return { point: p, body: null };
+  return null;
+}
+
+let down = null, drawing = null;
+const poly = $('#draw polyline');
+addEventListener('pointerdown', e => {
+  sfx.init();
+  if (e.target !== canvas) return;
+  if (tool === 'laser' && e.button === 0 && e.isPrimary) {
+    controls.enabled = false;
+    drawing = { scr: [[e.clientX, e.clientY]], pts: [], last: [e.clientX, e.clientY] };
+    const h = pickAt(e.clientX, e.clientY);
+    if (h) drawing.pts.push(h.point);
+    poly.setAttribute('points', `${e.clientX},${e.clientY}`);
+  }
+}, true);
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now(), b: e.button }; $('#tip').style.display = 'none'; });
+let lastHover = 0;
+addEventListener('pointermove', e => {
+  if (drawing) {
+    const [lx, ly] = drawing.last;
+    if (Math.hypot(e.clientX - lx, e.clientY - ly) > 9) {
+      drawing.last = [e.clientX, e.clientY];
+      drawing.scr.push([e.clientX, e.clientY]);
+      poly.setAttribute('points', drawing.scr.map(p => p.join(',')).join(' '));
+      const h = pickAt(e.clientX, e.clientY);
+      if (h) drawing.pts.push(h.point);
+    }
+    return;
+  }
+  if (e.pointerType === 'mouse' && !down && e.target === canvas) {
+    const now = performance.now();
+    if (now - lastHover > 90) { lastHover = now; hover(e.clientX, e.clientY); }
+  } else if (e.target !== canvas) $('#tip').style.display = 'none';
+});
+addEventListener('pointerup', e => {
+  if (drawing) {
+    const d = drawing; drawing = null;
+    controls.enabled = true;
+    poly.setAttribute('points', '');
+    if (d.pts.length) { begin(); laserRun(d.pts); if (d.pts.length === 1) explode(d.pts[0], 1.3, 7); }
+    down = null;
+    return;
+  }
+  if (!down) return;
+  const dd = down; down = null;
+  if (dd.b !== 0 || e.target !== canvas) return;
+  if (Math.hypot(e.clientX - dd.x, e.clientY - dd.y) > 7 || performance.now() - dd.t > 500) return;
+  const h = pickAt(e.clientX, e.clientY);
+  if (!h) return;
+  begin();
+  const c = h.point;
+  if (tool === 'bomb') bomb(c);
+  else if (tool === 'hammer') hammer(c);
+  else if (tool === 'meteor') meteor(c);
+  else if (tool === 'quake') startQuake(c);
+  else if (tool === 'nuke') nuke(c);
+});
+function floorLabel(f) {
+  if (f == null || f < 0) return '';
+  if (f === APR_K) return `APR 본사층(${f + 1}층) `;
+  if (f >= NF) return '옥상 ';
+  return `${f + 1}층 `;
+}
+function hover(x, y) {
+  const tip = $('#tip'), h = pickAt(x, y);
+  const o = h && h.body && h.body.obj;
+  if (!o) { tip.style.display = 'none'; return; }
+  tip.textContent = `${floorLabel(o.floor)}${o.name} · ₩${o.price.toLocaleString('ko-KR')}${o.hit ? ' (파손)' : ''}`;
+  tip.style.display = 'block';
+  tip.style.transform = `translate(${Math.min(x + 14, innerWidth - tip.offsetWidth - 8)}px, ${y + 16}px)`;
+}
+function flyTo(name) {
+  const [p1, t1] = VIEWS[name](), p0 = camera.position.clone(), t0 = controls.target.clone();
+  let t = 0;
+  tasks.push({
+    update(rdt) {
+      t += rdt;
+      const k = Math.min(1, t / 1.1), e = k * k * (3 - 2 * k);
+      camera.position.lerpVectors(p0, p1, e); controls.target.lerpVectors(t0, t1, e);
+      return k < 1;
+    },
+    kill() {},
+  });
+}
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  sfx.init();
+  const t = TOOLS.find(t => t.key === e.key);
+  if (t) { setTool(t.id); return; }
+  const k = e.key.toLowerCase();
+  if (k === 'n') toggleNight();
+  else if (k === 'r') resetAll();
+  else if (k === 'm') toggleSound();
+  else if (k === 'a') flyTo('apr');
+  else if (k === 'h') flyTo('home');
+  else if (e.key === 'Escape') { skipCine = true; if (slow) slow.t = slow.hold + slow.ramp; }
+});
+function toggleNight() { night = !night; applyLook(); }
+function toggleSound() {
+  muted = !muted;
+  if (sfx.master) sfx.master.gain.value = muted ? 0 : .55;
+  $('#btnSound').textContent = muted ? '🔇 소리 꺼짐' : '🔊 소리';
+}
+$('#btnNight').addEventListener('click', toggleNight);
+$('#btnReset').addEventListener('click', resetAll);
+$('#btnSound').addEventListener('click', toggleSound);
+$('#btnApr').addEventListener('click', () => flyTo('apr'));
+$('#btnHome').addEventListener('click', () => flyTo('home'));
+
+// ---------- 점수 · 알림 ----------
+let combo = 0, lastAct = 0, started = false;
+function begin() {
+  if (!started) { started = true; $('#hint').classList.add('gone'); }
+  const n = performance.now();
+  combo = n - lastAct < 3000 ? combo + 1 : 1;
+  lastAct = n;
+  if (combo >= 2) {
+    const el = $('#comboPop');
+    el.textContent = `COMBO ×${combo}`;
+    el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
+  }
+}
+const josa = (w, a, b) => { const c = w.charCodeAt(w.length - 1); if (c < 0xAC00 || c > 0xD7A3) return a; return (c - 0xAC00) % 28 ? a : b; };
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast card'; el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3700);
+  while ($('#toasts').children.length > 3) $('#toasts').firstChild.remove();
+}
+const pops = [];
+function pop(p, text, big) {
+  if (pops.length > 9) return;
+  const el = document.createElement('div');
+  el.className = 'pop' + (big ? ' big' : '');
+  el.innerHTML = '<span></span>'; el.firstChild.textContent = text;
+  $('#pops').appendChild(el);
+  pops.push({ el, p: p.clone(), t: 0 });
+}
+const won = n => '₩' + Math.round(n).toLocaleString('ko-KR');
+function flushHits() {
+  if (!pendingHits.length) return;
+  pendingHits.sort((a, b) => b.o.price - a.o.price);
+  for (const h of pendingHits.slice(0, 3)) pop(h.p.clone().setY(h.p.y + .4), `+${won(h.o.price)} ${h.o.name}`);
+  if (pendingHits.length > 3) {
+    const rest = pendingHits.slice(3), sum = rest.reduce((s, h) => s + h.o.price, 0);
+    pop(pendingHits[0].p.clone().setY(pendingHits[0].p.y + 1.2), `+${won(sum)} 외 ${rest.length}개`, true);
+  }
+  pendingHits.length = 0;
+}
+function korMoney(n) {
+  n = Math.round(n);
+  if (n < 10000) return n ? `${n.toLocaleString('ko-KR')}원` : '';
+  const jo = Math.floor(n / 1e12), eok = Math.floor(n % 1e12 / 1e8), man = Math.floor(n % 1e8 / 1e4);
+  let s = '';
+  if (jo) s += `${jo.toLocaleString('ko-KR')}조 `;
+  if (eok) s += `${eok.toLocaleString('ko-KR')}억 `;
+  if (man && !jo) s += `${man.toLocaleString('ko-KR')}만 `;
+  return `약 ${s.trim()} 원`;
+}
+const RANKS = [[0, '평화로운 오전 업무'], [3e5, '커피 쏟은 신입'], [3e6, '시말서 작성'], [3e7, '경위서 + 시말서'], [1.5e8, '징계위원회 회부'], [6e8, '권고사직'], [2e9, '손해배상 청구'], [8e9, '주가 하한가'], [3e10, '그룹 비상경영회의'], [1e11, '뉴스 속보 1면'], [3e11, '전설로 남은 퇴사자']];
+let shownDmg = 0, rankI = 0;
+function hud(rdt) {
+  if (Math.abs(stats.damage - shownDmg) > .5) {
+    shownDmg += (stats.damage - shownDmg) * Math.min(1, rdt * 5);
+    if (Math.abs(stats.damage - shownDmg) < 1) shownDmg = stats.damage;
+    $('#dmg').textContent = won(shownDmg);
+    $('#dmgKor').textContent = korMoney(shownDmg);
+  }
+  let r = 0;
+  while (r + 1 < RANKS.length && stats.damage >= RANKS[r + 1][0]) r++;
+  if (r !== rankI) {
+    if (r > rankI) toast(`📋 인사 발령: ${RANKS[r][1]}`);
+    rankI = r; $('#rank').textContent = RANKS[r][1];
+  }
+  $('#objs').textContent = `${stats.hitObjs.toLocaleString('ko-KR')}개`;
+  $('#pct').textContent = `${stats.total ? Math.min(100, stats.out / stats.total * 100).toFixed(1) : 0}%`;
+  $('#fell').textContent = `${stats.fell.toLocaleString('ko-KR')}개`;
+}
+
+function resetAll() {
+  for (const t of tasks) t.kill && t.kill();
+  tasks.length = 0;
+  for (const k in BK) { const bk = BK[k]; bk.mesh.count = 0; bk.bodies.length = 0; bk.dirtyM = bk.dirtyC = true; }
+  bodies = []; OBJS = []; floors = [];
+  deadCount = 0; rr = 0;
+  for (const c of grid) c.length = 0;
+  for (const c of sgrid) c.length = 0;
+  later.length = 0; crush.length = 0; popQ.clear();
+  Object.assign(stats, { damage: 0, total: 0, out: 0, hitObjs: 0, fell: 0 });
+  pendingHits.length = 0;
+  shownDmg = 0; rankI = 0; combo = 0;
+  $('#dmg').textContent = '₩0'; $('#dmgKor').textContent = ''; $('#rank').textContent = RANKS[0][1];
+  quake = null; slow = null; timeScale = 1; flashA = 0; dimTarget = 0; tint = 0; skipCine = false;
+  for (const d of decals) d.m.visible = false;
+  for (const f of [...fireballs, ...rings]) { f.t = f.d; f.m.visible = false; }
+  for (const f of flashLights) { f.t = f.d; f.l.intensity = 0; }
+  fire.clear(); smoke.clear();
+  for (const p of pops) p.el.remove();
+  pops.length = 0;
+  buildWorld();
+}
+
+// ---------- 루프 ----------
+const skyTintC = new THREE.Color(), orangeC = new THREE.Color(0xff8a3d);
+let last = performance.now();
+function tick(now) {
+  requestAnimationFrame(tick);
+  const rdt = Math.min(.05, (now - last) / 1000);
+  last = now;
+  if (slow) {
+    slow.t += rdt;
+    if (slow.t < slow.hold) timeScale = slow.scale;
+    else if (slow.t < slow.hold + slow.ramp) timeScale = slow.scale + (1 - slow.scale) * (slow.t - slow.hold) / slow.ramp;
+    else { timeScale = 1; slow = null; }
+  }
+  const dt = rdt * timeScale;
+  simT += dt;
+
+  camera.position.sub(shakeOff);
+  controls.update();
+
+  for (let i = tasks.length - 1; i >= 0; i--) if (!tasks[i].update(rdt, dt)) tasks.splice(i, 1);
+  updateQuake(dt);
+  physics(dt);
+  if (popQ.size) {
+    const k = popQ.values().next().value;
+    popQ.delete(k);
+    if (totalCount() < SOFTCAP - 4000) populate(k);
+  }
+  fire.update(dt); smoke.update(dt);
+
+  for (const f of fireballs) {
+    if (f.t >= f.d) continue;
+    f.t += dt;
+    const k = Math.min(1, f.t / f.d);
+    if (k >= 1) { f.m.visible = false; continue; }
+    f.m.scale.setScalar(f.r * (.3 + .7 * (1 - Math.pow(1 - k, 3))));
+    f.m.material.opacity = Math.pow(1 - k, 1.5) * .9;
+    f.m.material.color.setRGB(1, .75 - .5 * k, .4 - .35 * k);
+  }
+  for (const f of rings) {
+    if (f.t >= f.d) continue;
+    f.t += dt;
+    const k = Math.min(1, f.t / f.d);
+    if (k >= 1) { f.m.visible = false; continue; }
+    f.m.scale.setScalar(f.r * k + .1);
+    f.m.material.opacity = (1 - k) * .6;
+  }
+  for (const f of flashLights) {
+    if (f.t >= f.d) { f.l.intensity = 0; continue; }
+    f.t += dt;
+    f.l.intensity = f.i * Math.pow(Math.max(0, 1 - f.t / f.d), 2);
+  }
+  for (const d of decals) {
+    if (!d.m.visible) continue;
+    // 자국이 붙은 슬래브가 무너지면 자국도 지운다
+    if (d.under && (!d.under.alive || d.under.dyn)) { d.m.visible = false; continue; }
+    if (d.kind !== 'glow' || d.t > 3) continue;
+    d.t += dt;
+    const k = Math.min(1, d.t / 3);
+    d.m.material.color.setRGB(3 + (.06 - 3) * k, 1.2 + (.05 - 1.2) * k, .35 + (.04 - .35) * k);
+  }
+
+  if (tint > 0) tint = Math.max(0, tint - rdt / 8);
+  hemi.color.copy(baseHemi).lerp(orangeC, tint * .8);
+  skyMat.color.copy(skyTintC.setRGB(1, 1 - .45 * tint, 1 - .7 * tint));
+  flashA = Math.max(0, flashA - rdt / 2.4);
+  $('#flash').style.opacity = flashA.toFixed(3);
+  dimA += (dimTarget - dimA) * Math.min(1, rdt * 8);
+  $('#dim').style.opacity = dimA.toFixed(3);
+
+  for (const k in BK) {
+    const bk = BK[k];
+    if (bk.dirtyM) { bk.mesh.instanceMatrix.needsUpdate = true; bk.dirtyM = false; }
+    if (bk.dirtyC) { bk.mesh.instanceColor.needsUpdate = true; bk.dirtyC = false; }
+  }
+  flushHits();
+
+  shakeAmp *= Math.exp(-3.5 * rdt);
+  if (shakeAmp < .002) shakeAmp = 0;
+  shakeOff.set(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(shakeAmp * .35 * Math.max(1, camera.position.distanceTo(controls.target) / 40));
+  camera.position.add(shakeOff);
+
+  renderer.render(scene, camera);
+
+  for (let i = pops.length - 1; i >= 0; i--) {
+    const p = pops[i];
+    p.t += rdt;
+    if (p.t > 1.4) { p.el.remove(); pops.splice(i, 1); continue; }
+    _v.copy(p.p).project(camera);
+    p.el.style.transform = `translate(${(_v.x + 1) / 2 * innerWidth}px, ${(1 - _v.y) / 2 * innerHeight}px)`;
+    p.el.style.visibility = _v.z < 1 ? 'visible' : 'hidden';
+  }
+  hud(rdt);
+  if (combo && now - lastAct > 3000) combo = 0;
+}
+
+function resize() {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  pScale.value = renderer.domElement.height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
+}
+addEventListener('resize', resize);
+resize();
+
+const touch = matchMedia('(hover: none)').matches;
+$('#hint').textContent = touch
+  ? '건물을 톡 눌러 부수면 그 층 사무실이 드러납니다 · 분홍 띠가 APR 본사층 · 한 손가락: 회전 · 두 손가락: 이동·확대'
+  : '건물을 부수면 그 층 사무실이 드러납니다 · 분홍 띠가 APR 본사층(A 키로 이동) · 끌기: 회전 · 오른쪽 끌기: 이동 · 휠: 확대 · 1~6: 도구';
+buildWorld();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
