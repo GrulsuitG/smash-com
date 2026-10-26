@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="롯데월드타워와 그 안의 에이피알(APR) 사무실을 3D로 부수는 스트레스 해소용 비공식 패러디 게임">
-<title>SMASH APR — 롯데월드타워 에이피알 부수기</title>
+<meta name="description" content="회사 빌딩과 그 안의 사무실을 3D로 부수는 스트레스 해소 게임">
+<title>SMASH OFFICE — 회사 부수기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap">
@@ -84,7 +84,7 @@ canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); white-space: nowrap;
 }
 .btn:hover { border-color: var(--accent); }
-.btn.apr { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.btn.hq { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 #hint {
   position: fixed; left: 50%; bottom: 74px; transform: translateX(-50%); padding: 10px 16px; font-size: 13px;
   text-align: center; transition: opacity .6s; pointer-events: none; max-width: calc(100vw - 32px); line-height: 1.5;
@@ -152,9 +152,9 @@ canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
 
 <div id="left">
   <header id="brand" class="card">
-    <h1>SMASH <b>APR</b></h1>
-    <p class="sub">롯데월드타워 · 에이피알 본사 부수기</p>
-    <p class="note">회사·건물과 무관한 비공식 패러디, 스트레스 해소용입니다. 건물은 26층으로 줄인 축소판입니다.<br>
+    <h1>SMASH <b>OFFICE</b></h1>
+    <p class="sub">회사 빌딩 · 사무실 부수기</p>
+    <p class="note">스트레스 해소용 게임입니다. 등장하는 회사와 건물은 가상입니다.<br>
       <a href="https://hong-iron.github.io/SMASH/" target="_blank" rel="noopener">SMASH 대학교</a>에서 영감을 받아 새로 만들었습니다.</p>
   </header>
   <nav id="dock" class="card" aria-label="부수기 도구"></nav>
@@ -180,7 +180,7 @@ canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
 </aside>
 
 <div id="corner">
-  <button class="btn apr" id="btnApr" title="A">📍 APR층</button>
+  <button class="btn hq" id="btnHq" title="A">📍 우리 회사</button>
   <button class="btn" id="btnHome" title="H">🏙️ 전체</button>
   <button class="btn" id="btnNight" title="N">🌙 야근 모드</button>
   <button class="btn" id="btnReset" title="R">↺ 전부 복구</button>
@@ -216,9 +216,9 @@ const _v = new V3(), _v2 = new V3(), _p0 = new V3(), _s = new V3(), _up = new V3
 const _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _m = new THREE.Matrix4(), _e = new THREE.Euler();
 
 // 타워: 층마다 바닥 슬래브 타일·기둥·외벽 패널이 각각 부서지는 몸체다. 위로 갈수록 좁아진다
-const FH = 3.6, NF = 26, APR_K = 8;
+const FH = 3.6, NF = 26, HQ_K = 8;
 const plate = k => (k <= 9 ? [38, 28] : [38 - (k - 9) * .55, 28 - (k - 9) * .4]);
-const APR_Y = APR_K * FH;
+const HQ_Y = HQ_K * FH;
 const G = 15;
 const MAXI = 20000, SOFTCAP = 17000;
 const DENS = { wood: 650, plastic: 950, metal: 2700, glass: 2500, fabric: 250, stone: 2300, concrete: 2400, ceramic: 1800, plant: 300, elec: 1300, paper: 700, rock: 3000 };
@@ -244,7 +244,7 @@ controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, R
 const portrait = () => innerWidth / innerHeight < 1;
 const VIEWS = {
   home: () => { const f = portrait() ? 1.8 : 1; return [new V3(112 * f, 88 * f, 148 * f), new V3(0, 52, 0)]; },
-  apr: () => { const f = portrait() ? 1.7 : 1; return [new V3(34 * f, APR_Y + 14 * f, 44 * f), new V3(0, APR_Y + 1.6, 0)]; },
+  hq: () => { const f = portrait() ? 1.7 : 1; return [new V3(34 * f, HQ_Y + 14 * f, 44 * f), new V3(0, HQ_Y + 1.6, 0)]; },
 };
 { const [p, t] = VIEWS.home(); camera.position.copy(p); controls.target.copy(t); controls.update(); }
 
@@ -1191,12 +1191,12 @@ function printer(x, z) {
 }
 
 // ---------- 타워 골격 ----------
-const APR_COLS = [[-2.5, -8.1], [2.9, -8.1], [-8.3, -4.2], [-8.3, 3.4], [7.9, 3.4]];
+const HQ_COLS = [[-2.5, -8.1], [2.9, -8.1], [-8.3, -4.2], [-8.3, 3.4], [7.9, 3.4]];
 const genericCols = (W, D) => [-1, 0, 1].flatMap(i => [-1, 1].map(j => [i * (W / 2 - 6), j * (D / 2 - 5.5)]));
 function nearestCols(F, x, z) {
   return F.cols.map(c => [c, Math.hypot(c.pos.x - x, c.pos.z - z)]).sort((a, b) => a[1] - b[1]).slice(0, 3).map(a => a[0]);
 }
-function aprZoneColor(x, z) {
+function hqZoneColor(x, z) {
   if (x < -4.2 && z > 4.6) return 0xc9a57c;
   if ((x > 8 && z > 4.6) || (x < -8.6 && z < -.6)) return 0xe9e6e1;
   if (x > 8 && z < -5.4) return 0x666a73;
@@ -1211,7 +1211,7 @@ function buildFloor(k) {
   const SL = obj(roof ? '옥상 슬래브' : '바닥 슬래브', 40000000);
   for (let iz = 0; iz < F.nz; iz++) for (let ix = 0; ix < F.nx; ix++) {
     const cx = F.x0 + F.tw * (ix + .5), cz = F.z0 + F.td * (iz + .5);
-    const col = k === 0 ? 0xe9e6e1 : k === APR_K ? aprZoneColor(cx, cz) : roof ? 0x8f8c86 : C.slab;
+    const col = k === 0 ? 0xe9e6e1 : k === HQ_K ? hqZoneColor(cx, cz) : roof ? 0x8f8c86 : C.slab;
     const t = addB(SL, cx, -.45, cz, F.tw - .02, .45, F.td - .02, new THREE.Color(col).offsetHSL(0, 0, rand(-.015, .015)), {
       mat: 'concrete', stab: .92, free: true, tile: true, on: k ? nearestCols(floors[k - 1], cx, cz) : [],
     });
@@ -1228,12 +1228,12 @@ function buildFloor(k) {
     }
     return F;
   }
-  for (const [x, z] of k === APR_K ? APR_COLS : genericCols(W, D)) {
+  for (const [x, z] of k === HQ_K ? HQ_COLS : genericCols(W, D)) {
     const c = addB(obj('건물 기둥', 120000000), x, 0, z, .8, FH - .45, .8, C.concrete, { mat: 'concrete', stab: .85, solid: true, free: true, on: [tileAt(k, x, z, true)] });
     c.isCol = true;
     F.cols.push(c);
   }
-  const span = k === APR_K ? C.pink : C.spandrel;
+  const span = k === HQ_K ? C.pink : C.spandrel;
   for (const [along, edge] of [['x', F.z0], ['x', -F.z0], ['z', F.x0], ['z', -F.x0]]) {
     const len = along === 'x' ? W : D, n = Math.max(2, Math.round(len / 3)), w = len / n;
     for (let i = 0; i < n; i++) {
@@ -1263,8 +1263,8 @@ function buildCrown() {
   addB(obj('첨탑', 5000000000), 0, y, 0, .9, 24, .9, 0xd9dde2, { mat: 'metal', stab: .7, free: true, on: below });
 }
 
-// ---------- APR 본사층 (처음부터 채워 둔다) ----------
-function aprPod(cx, cz) {
+// ---------- 우리 회사 층 (처음부터 채워 둔다) ----------
+function hqPod(cx, cz) {
   for (const side of [1, -1]) {
     const yaw = side > 0 ? 0 : Math.PI;
     for (const dx of [-1.42, 0, 1.42]) {
@@ -1301,21 +1301,24 @@ function lounge() {
   bin(9.6, -1.2);
   whiteboard(10.6, 1.6, 0);
 }
-// 5×7 도트 글자로 쌓은 APR 로고. 블록 하나하나가 따로 부서진다
+// 5×7 도트 글자로 쌓은 로고. 블록 하나하나가 따로 부서진다
+const LOGO = 'WORK';
 const FONT = {
-  A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
-  P: ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
+  W: ['#...#', '#...#', '#...#', '#.#.#', '#.#.#', '##.##', '#...#'],
+  O: ['.###.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
   R: ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
+  K: ['#...#', '#..#.', '#.#..', '##...', '#.#..', '#..#.', '#...#'],
 };
 function reception() {
-  const W = obj('APR 로고 사인월', 15000000), cx = 12.9, wz = 5.0, segW = 7.4 / 4, segs = [];
+  const W = obj('회사 로고 사인월', 15000000), cx = 12.9, wz = 5.0, segW = 7.4 / 4, segs = [];
   for (let i = 0; i < 4; i++) segs.push(addB(W, 9.2 + segW * (i + .5), 0, wz, segW - .01, 3, .3, 0xf6f5f3, { mat: 'stone', stab: .8, solid: true }));
   const px = .27;
-  ['A', 'P', 'R'].forEach((ch, li) => {
-    const L = obj(`APR 로고 ${ch}`, 2000000);
+  const mid = (LOGO.length * 6 - 2) / 2;
+  [...LOGO].forEach((ch, li) => {
+    const L = obj(`로고 글자 ${ch}`, 2000000);
     FONT[ch].forEach((row, r) => [...row].forEach((on, c) => {
       if (on !== '#') return;
-      const col = li * 6 + c, x = cx + (col - 8) * px, y = .75 + (6 - r) * px;
+      const col = li * 6 + c, x = cx + (col - mid) * px, y = .75 + (6 - r) * px;
       const seg = segs[clamp(Math.floor((x - 9.2) / segW), 0, 3)];
       addB(L, x, y, wz + .15 + .06, px - .01, px - .01, .12, 0x141414, { stab: .45, on: [seg] });
     }));
@@ -1406,11 +1409,11 @@ function showroom() {
   plant(-17.1, -12.2); plant(-9.2, -12.2, .9); plant(-17.1, -.9, .9);
   whiteboard(-9.7, -8.3, Math.PI / 2);
 }
-function buildAprFloor() {
-  curFloor = APR_K; baseY = APR_Y;
-  floors[APR_K].populated = true;
-  for (const z of [-10.2, -6, -1.8]) for (const x of [-5.2, .2, 5.6]) aprPod(x, z);
-  for (const x of [-1, 4.4]) aprPod(x, 8.5);
+function buildHqFloor() {
+  curFloor = HQ_K; baseY = HQ_Y;
+  floors[HQ_K].populated = true;
+  for (const z of [-10.2, -6, -1.8]) for (const x of [-5.2, .2, 5.6]) hqPod(x, z);
+  for (const x of [-1, 4.4]) hqPod(x, 8.5);
   meetingRooms();
   lounge();
   reception();
@@ -1502,7 +1505,7 @@ function populateNear(c, R) {
 function buildWorld() {
   for (let k = 0; k <= NF; k++) buildFloor(k);
   buildCrown();
-  buildAprFloor();
+  buildHqFloor();
   curFloor = -1; baseY = 0;
 }
 
@@ -1792,7 +1795,7 @@ function nukeImpact(c) {
   shock(c, 60, 1.6);
   flashLight(c, 90000, 2.5);
   addDecal(c.x, c.y, c.z, 14, 'scorch');
-  toast('☢️ 롯데월드타워가 증발했습니다');
+  toast('☢️ 회사 빌딩이 증발했습니다');
   let t = 0;
   tasks.push({
     update(rdt, dt) {
@@ -1965,7 +1968,7 @@ addEventListener('pointerup', e => {
 });
 function floorLabel(f) {
   if (f == null || f < 0) return '';
-  if (f === APR_K) return `APR 본사층(${f + 1}층) `;
+  if (f === HQ_K) return `우리 회사(${f + 1}층) `;
   if (f >= NF) return '옥상 ';
   return `${f + 1}층 `;
 }
@@ -1999,7 +2002,7 @@ addEventListener('keydown', e => {
   if (k === 'n') toggleNight();
   else if (k === 'r') resetAll();
   else if (k === 'm') toggleSound();
-  else if (k === 'a') flyTo('apr');
+  else if (k === 'a') flyTo('hq');
   else if (k === 'h') flyTo('home');
   else if (e.key === 'Escape') { skipCine = true; if (slow) slow.t = slow.hold + slow.ramp; }
 });
@@ -2012,7 +2015,7 @@ function toggleSound() {
 $('#btnNight').addEventListener('click', toggleNight);
 $('#btnReset').addEventListener('click', resetAll);
 $('#btnSound').addEventListener('click', toggleSound);
-$('#btnApr').addEventListener('click', () => flyTo('apr'));
+$('#btnHq').addEventListener('click', () => flyTo('hq'));
 $('#btnHome').addEventListener('click', () => flyTo('home'));
 
 // ---------- 점수 · 알림 ----------
@@ -2215,8 +2218,8 @@ resize();
 
 const touch = matchMedia('(hover: none)').matches;
 $('#hint').textContent = touch
-  ? '건물을 톡 눌러 부수면 그 층 사무실이 드러납니다 · 분홍 띠가 APR 본사층 · 한 손가락: 회전 · 두 손가락: 이동·확대'
-  : '건물을 부수면 그 층 사무실이 드러납니다 · 분홍 띠가 APR 본사층(A 키로 이동) · 끌기: 회전 · 오른쪽 끌기: 이동 · 휠: 확대 · 1~6: 도구';
+  ? '건물을 톡 눌러 부수면 그 층 사무실이 드러납니다 · 분홍 띠가 우리 회사 층 · 한 손가락: 회전 · 두 손가락: 이동·확대'
+  : '건물을 부수면 그 층 사무실이 드러납니다 · 분홍 띠가 우리 회사 층(A 키로 이동) · 끌기: 회전 · 오른쪽 끌기: 이동 · 휠: 확대 · 1~6: 도구';
 buildWorld();
 requestAnimationFrame(tick);
 </script>
